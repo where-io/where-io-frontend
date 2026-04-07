@@ -1,0 +1,10 @@
+.layout {
+  display: flex;
+  height: 100vh;
+  width: 80%;
+  z-index: 0; 
+}
+
+.map-container {
+  flex: 1; /* ocupa todo o espaço restante */
+}

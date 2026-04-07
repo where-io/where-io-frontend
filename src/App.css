@@ -36,3 +36,12 @@
     transform: rotate(360deg);
   }
 }
+
+.layout {
+  display: flex;
+  height: 100vh; /* ocupa a tela inteira */
+}
+
+.map-container {
+  flex: 1; /* ocupa todo o espaço restante */
+}
