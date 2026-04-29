@@ -1,5 +1,5 @@
 
-import InfoCard from "../grid/InfoCard";
+import LocationInfoCard from "../grid/LocationInfoCard";
 import LightRedInfoCard from "../grid/LightRedInfoCard";
 import LightRedButton from "../button/LightRedButton";
 
@@ -31,14 +31,14 @@ const LocationHero = ({ name, imageSrc, imageAlt }) => (
 
 const InfoGrid = ({ coordinates, elevation, visibility }) => (
   <div className="grid grid-cols-2 gap-4 mb-8">
-    <InfoCard
+    <LocationInfoCard
       colSpan={2}
       label="Current Coordinates"
       value={coordinates}
       icon="radar"
     />
-    {/* <InfoCard label="Elevation" value={elevation} suffix="AMSL" />
-    <InfoCard label="Visibility" value={visibility} /> */}
+    {/* <LocationInfoCard label="Elevation" value={elevation} suffix="AMSL" />
+    <LocationInfoCard label="Visibility" value={visibility} /> */}
   </div>
 );
 

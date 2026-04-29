@@ -1,5 +1,5 @@
 
-export default function InfoCard({ label, value, suffix, icon, colSpan = 1 }){
+export default function LocationInfoCard({ label, value, suffix, icon, colSpan = 1 }){
     return(
         <div
             className={`${colSpan === 2 ? "col-span-2" : ""

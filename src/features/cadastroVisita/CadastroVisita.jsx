@@ -4,6 +4,7 @@ import FormSign from "../../components/navlink/Form/FormSign.jsx";
 import TextOnlyButton from "../button/TextOnlyButton.jsx";
 import FormField from "../../components/navlink/Form/FormField.jsx";
 import LightRedButton from "../button/LightRedButton.jsx";
+import {VisitaService} from "../../service/VisitaService";
 
 export default function CadastroVisita({ idLocalVar, onClose, onSaved }) {
 
@@ -38,19 +39,12 @@ export default function CadastroVisita({ idLocalVar, onClose, onSaved }) {
 
         console.log("Enviando payload para API:", payload);
 
-        try {
-        const response = await fetch("http://localhost:8080/api/visita", {
-            method: "POST",
-            headers: {
-            "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payload),
-        });
+        const response = await VisitaService.create(payload);
 
         if (!response.ok) {
             const errorBody = await response.text();
             throw new Error(
-            `Falha ao salvar local (${response.status}): ${errorBody}`,
+                `Falha ao salvar local (${response.status}): ${errorBody}`,
             );
         }
 
@@ -61,14 +55,8 @@ export default function CadastroVisita({ idLocalVar, onClose, onSaved }) {
         if (onClose) {
             onClose();
         }
-        } catch (err) {
-            console.error("Erro ao enviar local para API:", err);
-            window.alert(
-                "Nao foi possivel salvar o local. Verifique a API e tente novamente.",
-            );
-        } finally {
-            setIsSubmitting(false);
-        }
+
+        setIsSubmitting(false);
 
         // // Chama flyTo após o envio (com ou sem sucesso, desde que tenhamos coords válidas)
         // if (coords && coords.includes(",")) {

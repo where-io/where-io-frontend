@@ -5,6 +5,7 @@ import LightRedButton from "../button/LightRedButton.jsx";
 import TextOnlyButton from "../button/TextOnlyButton.jsx";
 import FormSign from "../../components/navlink/Form/FormSign.jsx";
 import FormField from "../../components/navlink/Form/FormField.jsx";
+import {LocaisService} from "../../service/LocaisService";
 
 // ============================================================
 // 🧩 COMPONENTE 1: useGooglePlaces (Custom Hook)
@@ -205,7 +206,6 @@ export default function CadastroLocal({ onClose, onSaved }) {
 
     const enderecoParsed = parseEndereco(address);
 
-    console.log(enderecoParsed);
     const payload = {
       nome: name,
       endereco: {
@@ -223,45 +223,30 @@ export default function CadastroLocal({ onClose, onSaved }) {
       descricao: description,
     };
 
-    console.log("Enviando payload para API:", payload);
+    const response = await LocaisService.create(payload)
 
-    try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
+    if (!response.ok) {
         const errorBody = await response.text();
         throw new Error(
-          `Falha ao salvar local (${response.status}): ${errorBody}`,
+        `Falha ao salvar local (${response.status}): ${errorBody}`,
         );
-      }
-
-      if (onSaved) {
-        onSaved();
-      }
-
-      if (onClose) {
-        onClose();
-      }
-    } catch (err) {
-      console.error("Erro ao enviar local para API:", err);
-      window.alert(
-        "Nao foi possivel salvar o local. Verifique a API e tente novamente.",
-      );
-    } finally {
-      setIsSubmitting(false);
     }
+
+    if (onSaved) {
+        onSaved();
+    }
+
+    if (onClose) {
+        onClose();
+    }
+
+    setIsSubmitting(false);
 
     // Chama flyTo após o envio (com ou sem sucesso, desde que tenhamos coords válidas)
     if (coords && coords.includes(",")) {
-      const [lat, lng] = coords.split(",").map((c) => parseFloat(c.trim()));
-      console.log("Chamando flyTo com coords:", [lat, lng]);
-      flyTo([lat, lng], 17);
+        const [lat, lng] = coords.split(",").map((c) => parseFloat(c.trim()));
+        console.log("Chamando flyTo com coords:", [lat, lng]);
+        flyTo([lat, lng], 17);
     }
   }
 

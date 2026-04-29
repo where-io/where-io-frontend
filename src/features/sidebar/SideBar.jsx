@@ -1,18 +1,18 @@
 
 import NavLink from "../../components/navlink/NavLink.jsx";
-import RedButton from '../button/RedButtom.jsx'
+import RedButton from '../button/RedButton.jsx'
 
 
 export default function SideNavBar({ onAddLocation, onOpenSavedPlaces, activeNav }) {
   const navItems = [
     { icon: "explore", label: "Explore", active: activeNav === "Explore" },
     {
-      icon: "bookmark",
-      label: "Lugares Salvos",
+      icon: "library_add",
+      label: "Coleção",
       onClick: onOpenSavedPlaces,
       active: activeNav === "Lugares Salvos",
     },
-    { icon: "library_add", label: "Coleções", active: activeNav === "Coleções" },
+    { icon: "people", label: "Amigos", active: activeNav === "Coleções" },
     // { icon: "history", label: "Recent" },
   ];
 
