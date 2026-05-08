@@ -1,24 +1,32 @@
-
-export default function LocationInfoCard({ label, value, suffix, icon, colSpan = 1 }){
-    return(
-        <div
-            className={`${colSpan === 2 ? "col-span-2" : ""
-            } bg-white/5 p-4 rounded-2xl border border-white/5`}
-        >
-            <span className="text-[10px] text-gray-400 uppercase tracking-tighter block mb-1">
-            {label}
-            </span>
-            <div className="flex justify-between items-end">
-            <span className="text-lg font-bold text-white font-mono">
-                {value}{" "}
-                {suffix && (
-                <span className="text-xs font-normal text-gray-500">{suffix}</span>
-                )}
-            </span>
-            {icon && (
-                <span className="material-symbols-outlined text-red-400/40">{icon}</span>
-            )}
-            </div>
-        </div>
-    )
+export default function LocationInfoCard({ label, value, suffix, icon, colSpan = 1 }) {
+  return (
+    <div
+      style={{
+        background: 'var(--bg-4)', borderRadius: 10, padding: '10px 14px',
+        gridColumn: colSpan === 2 ? 'span 2' : undefined,
+      }}
+    >
+      <div style={{
+        fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+        letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--ink-3)',
+      }}>
+        {label}
+      </div>
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 3,
+      }}>
+        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 14, color: 'var(--ink)' }}>
+          {value}
+          {suffix && (
+            <span style={{ fontSize: 11, color: 'var(--ink-3)', marginLeft: 4 }}>{suffix}</span>
+          )}
+        </span>
+        {icon && (
+          <span className="material-symbols-outlined" style={{ fontSize: 14, color: 'var(--coral)', opacity: 0.5 }}>
+            {icon}
+          </span>
+        )}
+      </div>
+    </div>
+  );
 }

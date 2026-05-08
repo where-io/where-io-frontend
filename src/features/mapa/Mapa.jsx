@@ -1,22 +1,84 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { useEffect } from "react";
+import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useMapActions } from './MapContext';
 
-// Importante: Corrigir ícones do Leaflet que as vezes quebram no build do React
+// Pin SVG alinhado ao design system (cor coral, borda clara)
 import L from 'leaflet';
 
-let DefaultIcon = L.icon({
-  // URL de um marcador vermelho padrão hospedado
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+const WHERE_IO_MARKER_PATH =
+  "M16 41s13-13.5 13-25A13 13 0 1 0 3 16c0 11.5 13 25 13 25z";
 
-  iconSize: [28, 45],
-  iconAnchor: [12, 41],   // A metade da largura e o total da altura para a ponta ficar no local certo
-  popupAnchor: [1, -50],    // Ajusta onde o balão do popup aparece
-  shadowSize: [45, 45]      // Aumenta a sombra também para combinar
-});
-L.Marker.prototype.options.icon = DefaultIcon;
+/** Cor padrão do pin (--coral) quando há 0 ou mais de uma tag */
+const DEFAULT_PIN_FILL = "#FF6B5E";
+
+const markerIconByFill = new Map();
+
+function resolveFillFromTagCor(cor) {
+  if (cor == null || String(cor).trim() === "") return DEFAULT_PIN_FILL;
+  const s = String(cor).trim();
+  if (s.startsWith("#")) {
+    const body = s.slice(1);
+    if (body.length === 3 || body.length === 6 || body.length === 8) return `#${body}`;
+    return DEFAULT_PIN_FILL;
+  }
+  if (/^[\dA-Fa-f]{3}$|^[\dA-Fa-f]{6}$|^[\dA-Fa-f]{8}$/i.test(s)) return `#${s}`;
+  return DEFAULT_PIN_FILL;
+}
+
+/** Uma tag no local → cor do pin igual à da tag; várias ou nenhuma → padrão */
+function pinFillForLocation(loc) {
+  const tags = loc?.tags;
+  if (!Array.isArray(tags) || tags.length !== 1) return DEFAULT_PIN_FILL;
+  return resolveFillFromTagCor(tags[0]?.cor);
+}
+
+function createWhereIoMarkerIcon(fillHex) {
+  const safeFill =
+    typeof fillHex === "string" && /^#[\dA-Fa-f]{3,8}$/.test(fillHex)
+      ? fillHex
+      : DEFAULT_PIN_FILL;
+  return L.divIcon({
+    html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 42" width="32" height="42" aria-hidden="true"><path d="${WHERE_IO_MARKER_PATH}" fill="${safeFill}" stroke="rgba(255,255,255,0.6)" stroke-width="1"/><circle cx="16" cy="16" r="6.8" fill="#ffffff"/></svg>`,
+    className: "leaflet-div-icon where-io-map-marker",
+    iconSize: [32, 42],
+    iconAnchor: [16, 41],
+    popupAnchor: [0, -38],
+  });
+}
+
+function getMarkerIconForLocation(loc) {
+  const fill = pinFillForLocation(loc);
+  if (markerIconByFill.has(fill)) return markerIconByFill.get(fill);
+  const icon = createWhereIoMarkerIcon(fill);
+  markerIconByFill.set(fill, icon);
+  return icon;
+}
+
+/**
+ * Temas alinhados aos TileLayers comentados neste arquivo.
+ * satellite: Esri World Imagery
+ * terrain: Google Maps terrain (lyrs=t)
+ * dark: Carto Dark Matter
+ */
+export const MAP_THEMES = {
+  satellite: {
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    attribution: "Tiles &copy; Esri",
+  },
+  terrain: {
+    url: "https://{s}.google.com/vt/lyrs=t&x={x}&y={y}&z={z}",
+    subdomains: ["mt0", "mt1", "mt2", "mt3"],
+    attribution: "&copy; Google Maps",
+  },
+  dark: {
+    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    subdomains: ["a", "b", "c", "d"],
+    attribution: "&copy; OpenStreetMap &copy; CARTO",
+  },
+};
+
+export const MAP_THEME_ORDER = ["satellite", "terrain", "dark"];
 
 function FlyToLocation({ center, zoom }) {
   const map = useMap();
@@ -38,14 +100,12 @@ function FlyToLocation({ center, zoom }) {
   return null;
 }
 
-const Map = ({ locations = [], onLocationSelect }) => {
-  const { flyTo } = useMapActions();
+const Mapa = ({ locations = [], onLocationSelect }) => {
+  const { flyTo, mapTheme } = useMapActions();
 
   const position = [-23.51584714949877, -46.78674290051228];
 
-  const [mapUrl, setMapUrl] = useState("");
-  const [mapSubdomains, setMapSubdomains] = useState("");
-  const [mapAttribution, setMapAttribution] = useState("");
+  const tile = MAP_THEMES[mapTheme] || MAP_THEMES.satellite;
 
   const getLatLng = (loc) => {
     const latRaw = loc?.coordenadas?.latitude;
@@ -76,22 +136,16 @@ const Map = ({ locations = [], onLocationSelect }) => {
         style={{ height: "100%", width: "100%", zIndex: "0" }}
       >
         <FlyToLocation />
-        {/* <TileLayer
-          url="https://{s}.google.com/vt/lyrs=r&x={x}&y={y}&z={z}"
-          subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
-          attribution='&copy; Google Maps'
-        /> */}
-        {/* <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          attribution="&copy; OpenStreetMap &copy; CARTO"
-        /> */}
-        {/* <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution="&copy; OpenStreetMap contributors"
-        /> */}
+        {/*
+          Referência de temas (rodízio via MAP_THEMES / mapTheme no contexto):
+          Google roadmap: lyrs=r — https://{s}.google.com/vt/lyrs=r&x={x}&y={y}&z={z}
+          OSM: https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
+        */}
         <TileLayer
-          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-          attribution="Tiles &copy; Esri"
+          key={mapTheme}
+          url={tile.url}
+          attribution={tile.attribution}
+          {...(tile.subdomains ? { subdomains: tile.subdomains } : {})}
         />
 
         {/* Agora sim, apenas expressão dentro do JSX */}
@@ -104,6 +158,7 @@ const Map = ({ locations = [], onLocationSelect }) => {
             <Marker
               key={loc.id}
               position={latLng}
+              icon={getMarkerIconForLocation(loc)}
               eventHandlers={{
                 click: () => handleLocationClick(loc, latLng),
               }}
@@ -121,4 +176,4 @@ const Map = ({ locations = [], onLocationSelect }) => {
   );
 };
 
-export default Map;
+export default Mapa;

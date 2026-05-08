@@ -1,3 +1,57 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --bg-0: #0A1028;
+  --bg-1: #0E1530;
+  --bg-2: #141B36;
+  --bg-3: #1B2244;
+  --bg-4: #242C55;
+  --line: #2A3360;
+  --line-soft: rgba(255, 255, 255, 0.06);
+  --ink: #F2F4FF;
+  --ink-2: #B8BEDC;
+  --ink-3: #6E7699;
+  --ink-4: #4A5176;
+  --coral: #FF6B5E;
+  --coral-soft: #FF8674;
+  --coral-deep: #E04A3D;
+  --coral-glow: rgba(255, 107, 94, 0.35);
+  --aqua: #5EE0C8;
+  --amber: #F2B95C;
+  --violet: #8C7BFF;
+  --rose: #FF6B9D;
+  --sky: #5EB7FF;
+  --tracking: 0.18em;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg-0);
+  color: var(--ink);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(94, 224, 200, 0.18); }
+  50%       { box-shadow: 0 0 0 8px rgba(94, 224, 200, 0.05); }
+}
+
+.sidebar-scroll::-webkit-scrollbar        { width: 6px; }
+.sidebar-scroll::-webkit-scrollbar-thumb  { background: var(--bg-4); border-radius: 3px; }
+.sidebar-scroll::-webkit-scrollbar-track  { background: transparent; }
+
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Leaflet divIcon: remove moldura branca padrão do pin SVG */
+.leaflet-div-icon.where-io-map-marker {
+  background: transparent !important;
+  border: none !important;
+}

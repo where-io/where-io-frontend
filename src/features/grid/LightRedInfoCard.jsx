@@ -1,35 +1,37 @@
+export default function LightRedInfoCard({ reviewNumber, reviewLabel, data }) {
+  const porcentagem = (reviewNumber / 5) * 100;
 
-export default function LightRedInfoCard({ reviewNumber, reviewLabel, data}){
-    
-    const porcentagem = reviewNumber/5 * 100
+  return (
+    <div style={{
+      background: 'rgba(255,107,94,0.06)', borderRadius: 10, padding: '14px 16px',
+      border: '1px solid rgba(255,107,94,0.15)',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+        <span style={{
+          fontFamily: "'JetBrains Mono', monospace", fontSize: 11,
+          color: 'var(--ink-3)', letterSpacing: '0.1em',
+        }}>
+          {data}
+        </span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+          style={{ width: 13, height: 13, color: 'var(--coral)', flexShrink: 0 }}>
+          <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7l3-7z" />
+        </svg>
+      </div>
 
-    return(
-        <div className="bg-red-400/5 rounded-2xl p-4 border border-red-400/20">
-            <div className="flex justify-between items-start mb-4">
-            <h4 className="text-lg font-bold text-red-400 uppercase tracking-widest">
-                {data}
-            </h4>
-            <span className="material-symbols-outlined text-red-400 text-sm">
-                trip
-            </span>
-            </div>
-                <div className="relative inline-block text-2xl">
-                    {/* Camada de fundo — estrelas vazias */}
-                    <div className="text-gray-300">
-                        {"★".repeat(5)}
-                    </div>
+      <div style={{ position: 'relative', display: 'inline-block', fontSize: 18, marginBottom: 6 }}>
+        <div style={{ color: 'var(--ink-4)' }}>{'★'.repeat(5)}</div>
+        <div style={{
+          position: 'absolute', top: 0, left: 0, overflow: 'hidden',
+          color: 'var(--coral)', width: `${porcentagem}%`, transition: 'width 0.4s',
+        }}>
+          {'★'.repeat(5)}
+        </div>
+      </div>
 
-                    {/* Camada de cima — estrelas preenchidas, usa a mesma lógica da barra! */}
-                    <div
-                        className="absolute top-0 left-0 overflow-hidden text-red-400 transition-all duration-700"
-                        style={{ width: `${porcentagem}%` }} // ← mesma lógica!
-                    >
-                        {"★".repeat(5)}
-                    </div>
-                </div>
-            <div className="flex items-center gap-4">
-            <span className="text-xl font-light text-white">{reviewLabel}</span>
-            </div>
-        </div> 
-    )
+      {reviewLabel && (
+        <div style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 2 }}>{reviewLabel}</div>
+      )}
+    </div>
+  );
 }

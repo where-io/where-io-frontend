@@ -1,49 +1,92 @@
-
 import NavLink from "../../components/navlink/NavLink.jsx";
-import RedButton from '../button/RedButton.jsx'
+import RedButton from '../button/RedButton.jsx';
 
+export default function SideNavBar({ onAddLocation, onOpenSavedPlaces, onOpenFriends, onOpenSettings, activeNav }) {
+  const mainNav = [
+    { icon: "explore",  label: "Explore",  active: activeNav === "Explore" },
+    { icon: "bookmark", label: "Coleção",   active: activeNav === "Lugares Salvos", onClick: onOpenSavedPlaces },
+    { icon: "people",   label: "Amigos",    active: activeNav === "Amigos", onClick: onOpenFriends },
+  ];
 
-export default function SideNavBar({ onAddLocation, onOpenSavedPlaces, activeNav }) {
-  const navItems = [
-    { icon: "explore", label: "Explore", active: activeNav === "Explore" },
-    {
-      icon: "library_add",
-      label: "Coleção",
-      onClick: onOpenSavedPlaces,
-      active: activeNav === "Lugares Salvos",
-    },
-    { icon: "people", label: "Amigos", active: activeNav === "Coleções" },
-    // { icon: "history", label: "Recent" },
+  const quickNav = [
+    { icon: "search", label: "Buscar coordenada", badge: "⌘K" },
+    { icon: "layers", label: "Camadas" },
+  ];
+
+  const footerNav = [
+    { icon: "settings", label: "Settings", onClick: onOpenSettings },
+    { icon: "help",     label: "Help" },
   ];
 
   return (
-    <nav className="fixed left-0 top-0 h-full w-64 bg-[#101225] flex flex-col p-6 gap-y-2 z-50 rounded-r-lg shadow-none font-['Manrope'] font-medium text-sm hidden md:flex z-1">
-      {/* Logo / Título */}
-      <div className="text-lg font-black text-[#edf2f4] mb-8">
-        WHERE-<span className="text-[#ef233c]">io</span>
-        <p className="text-[10px] uppercase tracking-[0.2em] text-[#8d99ae] font-normal mt-1">
-          Navigation System
-        </p>
+    <nav style={{
+      position: 'fixed', left: 0, top: 0, height: '100%', width: 256,
+      background: 'var(--bg-1)', borderRight: '1px solid var(--line)',
+      display: 'flex', flexDirection: 'column',
+      padding: '28px 18px 22px', zIndex: 50,
+    }}>
+      {/* Brand */}
+      <div style={{ padding: '0 8px 28px' }}>
+        <div style={{
+          fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 22,
+          letterSpacing: '-0.01em', color: 'var(--ink)',
+        }}>
+          WHERE<span style={{ color: 'var(--coral)' }}>·io</span>
+        </div>
+        <div style={{
+          fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+          letterSpacing: 'var(--tracking)', color: 'var(--ink-3)',
+          textTransform: 'uppercase', marginTop: 6,
+        }}>
+          // navigation system
+        </div>
       </div>
 
-      {/* Itens de navegação — renderizados com .map() */}
-      {navItems.map((item) => (
-        <NavLink key={item.label} {...item} />
-      ))}
+      {/* Main nav */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {mainNav.map(item => <NavLink key={item.label} {...item} />)}
+      </div>
 
-      {/* Rodapé da sidebar */}
-      <div className="mt-auto flex flex-col gap-2">
-        <RedButton onClickFunction={onAddLocation} label="Adicionar Local" symbol="add">
-          Adicionar Local
-        </RedButton>
-        <a href="#" className="text-[#8d99ae] px-4 py-2 hover:text-[#edf2f4] flex items-center gap-3 transition-all">
-          <span className="material-symbols-outlined">settings</span>
-          <span>Settings</span>
-        </a>
-        <a href="#" className="text-[#8d99ae] px-4 py-2 hover:text-[#edf2f4] flex items-center gap-3 transition-all">
-          <span className="material-symbols-outlined">help</span>
-          <span>Help</span>
-        </a>
+      {/* Quick section label */}
+      <div style={{
+        fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+        letterSpacing: 'var(--tracking)', color: 'var(--ink-4)',
+        textTransform: 'uppercase', margin: '18px 14px 8px',
+      }}>
+        // quick
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {quickNav.map(item => (
+          <div key={item.label} style={{
+            display: 'flex', alignItems: 'center', gap: 12, padding: '9px 14px',
+            borderRadius: 10, fontSize: 13, color: 'var(--ink-2)', cursor: 'default',
+          }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 15 }}>{item.icon}</span>
+            <span>{item.label}</span>
+            {item.badge && (
+              <span style={{
+                marginLeft: 'auto', fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 10, letterSpacing: '0.1em', color: 'var(--ink-3)',
+              }}>
+                {item.badge}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Spacer */}
+      <div style={{ flex: 1 }} />
+
+      {/* Add button */}
+      <RedButton onClickFunction={onAddLocation}>Adicionar Local</RedButton>
+
+      {/* Footer nav */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginTop: 14 }}>
+        {footerNav.map(item => (
+          <NavLink key={item.label} icon={item.icon} label={item.label} onClick={item.onClick} />
+        ))}
       </div>
     </nav>
   );

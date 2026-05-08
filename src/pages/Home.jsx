@@ -5,6 +5,8 @@ import { MapActionsProvider } from "../features/mapa/MapContext.jsx";
 import Sidebar from "../features/sidebar/SideBar.jsx";
 import LocationSidebar from "../features/sidebar/LocationSidebar.jsx";
 import CollectionSidebar from "../features/sidebar/CollectionSidebar.jsx";
+import FriendsSidebar from "../features/sidebar/FriendsSidebar.jsx";
+import SettingsModal from "../features/sidebar/SettingsModal.jsx";
 import CadastroLocal from "../features/cadastroLocal/CadastroLocal.jsx";
 import CadastroVisita from "../features/cadastroVisita/CadastroVisita.jsx";
 import {LocaisService} from "../service/LocaisService";
@@ -18,6 +20,8 @@ function Home() {
     const [isLocationSidebarOpen, setIsLocationSidebarOpen] = useState(false);
     const [visitas, setVisitas] = useState([]);
     const [isSavedPlacesOpen, setIsSavedPlacesOpen] = useState(false);
+    const [isFriendsOpen, setIsFriendsOpen] = useState(false);
+    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [activeNav, setActiveNav] = useState("Explore");
     const closeSidebarTimeoutRef = useRef(null);
 
@@ -67,6 +71,15 @@ function Home() {
         };
     }, []);
 
+    const handleLocationSelect = useCallback((location) => {
+        if (closeSidebarTimeoutRef.current) {
+            clearTimeout(closeSidebarTimeoutRef.current);
+        }
+
+        setSelectedLocation(location);
+        setIsLocationSidebarOpen(true);
+    }, []);
+
     const selectedLocationData = useMemo(() => {
         if (!selectedLocation) return null;
 
@@ -99,25 +112,40 @@ function Home() {
             <div className="">
                 <Mapa
                     locations={locations}
-                    onLocationSelect={(location) => {
-                        if (closeSidebarTimeoutRef.current) {
-                            clearTimeout(closeSidebarTimeoutRef.current);
-                        }
-                        setSelectedLocation(location);
-                    }}
+                    onLocationSelect={handleLocationSelect}
                 />
                 <Sidebar
                     onAddLocation={openCadastroLocal}
                     onOpenSavedPlaces={() => {
                         setIsSavedPlacesOpen(true);
+                        setIsFriendsOpen(false);
                         setActiveNav("Lugares Salvos");
                     }}
+                    onOpenFriends={() => {
+                        setIsFriendsOpen(true);
+                        setIsSavedPlacesOpen(false);
+                        setActiveNav("Amigos");
+                    }}
+                    onOpenSettings={() => setIsSettingsModalOpen(true)}
                     activeNav={activeNav}
+                />
+                <SettingsModal
+                    isOpen={isSettingsModalOpen}
+                    onClose={() => setIsSettingsModalOpen(false)}
                 />
                 <CollectionSidebar
                     isOpen={isSavedPlacesOpen}
+                    selectedPlaceId={selectedLocation?.id}
+                    onPlaceSelect={handleLocationSelect}
                     onClose={() => {
                         setIsSavedPlacesOpen(false);
+                        setActiveNav("Explore");
+                    }}
+                />
+                <FriendsSidebar
+                    isOpen={isFriendsOpen}
+                    onClose={() => {
+                        setIsFriendsOpen(false);
                         setActiveNav("Explore");
                     }}
                 />

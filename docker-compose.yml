@@ -1,0 +1,15 @@
+services:
+  frontend:
+    build: .
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+  backend:
+    # Aponte para o diretório do projeto Spring Boot
+    build: ../back
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod

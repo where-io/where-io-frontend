@@ -1,12 +1,15 @@
-
-export default function TextOnlyButton({ onClickFunction, children}){
-    return(
-        <button
-        type="button"
-        onClick={onClickFunction}
-        className="text-[#bbc7dd]/60 text-sm font-medium hover:text-[#e2e2e2] transition-colors"
-        >
-            {children}
-        </button>
-    )
+export default function TextOnlyButton({ onClickFunction, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClickFunction}
+      style={{
+        background: 'transparent', color: 'var(--ink-2)',
+        border: '1px solid var(--line)', padding: '11px 18px',
+        borderRadius: 999, fontSize: 13, cursor: 'pointer', fontWeight: 500,
+      }}
+    >
+      {children}
+    </button>
+  );
 }

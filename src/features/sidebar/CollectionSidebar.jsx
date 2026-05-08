@@ -1,244 +1,366 @@
-import { useEffect, useState } from "react";
-import {LocaisService} from "../../service/LocaisService";
+import { useEffect, useMemo, useState } from "react";
+import { LocaisService } from "../../service/LocaisService";
+import { TagService } from "../../service/TagService";
+import { useMapActions } from "../mapa/MapContext.jsx";
 
-// Tailwind config is injected via CDN in the HTML shell that renders this component.
-// All class names match the custom theme defined in the original HTML.
+function resolveTagColor(cor) {
+  if (cor == null || String(cor).trim() === "") return "var(--coral)";
+  const s = String(cor).trim();
+  if (s.startsWith("#")) return s;
+  if (/^[\dA-Fa-f]{3}$|^[\dA-Fa-f]{6}$|^[\dA-Fa-f]{8}$/i.test(s)) return `#${s}`;
+  return s;
+}
 
-const FILTERS = ["All", "Nebulae", "Stations", "Outposts"];
+/** Fundo suave para chip ativo; só expande hex #RRGGBB com alpha. */
+function tagChipTint(corHex, alpha) {
+  const c = resolveTagColor(corHex);
+  if (typeof c !== "string" || !c.startsWith("#")) return "rgba(255,255,255,0.06)";
+  const raw = c.slice(1);
+  const hex =
+    raw.length === 3
+      ? raw
+          .split("")
+          .map((ch) => ch + ch)
+          .join("")
+      : raw.length >= 6
+        ? raw.slice(0, 6)
+        : null;
+  if (!hex || hex.length !== 6) return "rgba(255,255,255,0.06)";
+  const r = Number.parseInt(hex.slice(0, 2), 16);
+  const g = Number.parseInt(hex.slice(2, 4), 16);
+  const b = Number.parseInt(hex.slice(4, 6), 16);
+  if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return "rgba(255,255,255,0.06)";
+  return `rgba(${r},${g},${b},${alpha})`;
+}
 
-const PLACES = [
-    {
-        id: 1,
-        name: "Orion's Belt Outpost",
-        subtitle: "Sector 7G • Alpha Quadrant",
-        pinned: true,
-        img: "https://lh3.googleusercontent.com/aida-public/AB6AXuCWtOUQOxxUd4xOLjLlsREUr99li3QoE1EugcVVvLh1CLT5PxrMPf8Te_m3NGMWERCtmkLhEmwgqy7k1QewI6oD5FW33JQCDEAFqMHvsC8zmbm5NobK50LYoP_-8RzohOu08lGfJYHcbdUFOG8umq_9N5SSCqmhjRquIYyEz7tR96HztWkchtxt4hnSq4vUCfORqx0o8qhMG5XqqTrmCxTe3u3mNCQIoQQOQOvrsF2Pp8V-mEczDBX7G3hQQhJdf-XlI59YLc31GpU",
-        alt: "vibrant pink and orange glowing nebula in deep space with surrounding pin-point stars",
-    },
-    {
-        id: 2,
-        name: "Mare Tranquillitatis",
-        subtitle: "Lunar Hub • Base IV",
-        pinned: false,
-        img: "https://lh3.googleusercontent.com/aida-public/AB6AXuCbnXppjgIK2By82gUkQxgAJ1GWjbxVg87La0DrN5kv-nfgXP6GEHdfEZBWnJwl9Ft5eXo44WnXC4-cSK-Z9tLtMolwYIUnAdwyytzGdsKT37BCZWS6CXLYfCX5gE4uJG0rhLPYfoz5v0V0-aF-Ya4BLokLYeMbWBFQxgLgAK_VW-URPZ8xV-GX1dEgKLa2kGDXUo1D-U0sDXy2ZUO6Lteq3iIOMjm1DgD8lMcBVPV8O7E0daanhrXXXPtNZZIZ_OTqjLq9FF5OL_0",
-        alt: "high contrast aerial view of a dark lunar landscape with deep craters and sharp shadows",
-    },
-    {
-        id: 3,
-        name: "Neptune Echo Station",
-        subtitle: "Outer Rim • Deep Space 9",
-        pinned: false,
-        img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBM2Om941FKTeVdWrGPbLZS0ehwf-kLoHimlp_GFBGfRjjVXepzBFVbUNmsLtr2zzFyUH3alLTz-KcClveIxo_4Y2UxgYnEKBcaDE2DI3Uj31kPsgbt8PdYVkaO6giRKamHBMHm86iel1yGU4ZYRgPyXvvDOymbMJLw6a6bTnp2jWQ3AvJmZjMKtXCnABu1fSfTuD2ObR11FT1yhabPwmNBSut2_gMDRkW7_AgJvdRDfqM5RyH55IthAMsKYCd8-3jK_EUtsz-s6Rw",
-        alt: "dramatic blue swirling gas giant planet with faint rings in a dark cosmic void",
-    },
-    {
-        id: 4,
-        name: "ISS Terminal C",
-        subtitle: "Low Earth Orbit • 408km",
-        pinned: false,
-        img: "https://lh3.googleusercontent.com/aida-public/AB6AXuCOCrU50tpl0TuofXBy3bxV9Lyjs7YX0FpwoQrXaD8qh5-fCkSq6ahn_XWqtwAkXl9rcs4wKiE_ah6eD4Zu4neZB0vQGJnnlfLarQ1d-4ci5vj9zg7x5LdAKOI7h2caVA2-MmqU7JR_DNHLuup1kZFmKgPx6UFEHIIBy4lBv7ExKe5ykXSUmt2PFDb1IoPs7SxGBtaaqH9kV42cKKGo_NsORZsdT2zCuIMokN2p-waj-E5seA86m3Y1zNTpXCpvafPupt0HZVnlYCo",
-        alt: "view of earth from orbit with glowing atmospheric haze and city lights at night",
-    },
-    {
-        id: 5,
-        name: "Andromeda Gateway",
-        subtitle: "Intergalactic Transit • Port 1",
-        pinned: false,
-        img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDx6VLH1Yu-7zx_pw5w97mK3umiD4yIE_MTEs6HwAHuCjno41pSv_Y_t-b1FxRUHqq3tZeCmFRCqG7S792QUa6syqPFsI-p6tcw2tevkL0ligaYT8G6pkqPmIgm_tg_2f7sGMrNf6NzON4tsd52a7bU2dIpgAQLU8akzithlKTY4zLagYHittZPTPzwDWLtTCTYDYlV-mi6Hcpe7NyPf381CZCsxu59-J6FYZPfC6UGbx8JBUwrV4MFeUXj2LKE4RzG9E0AQtjdIPc",
-        alt: "stunning dark space field with millions of sharp white stars and a subtle violet glow",
-    },
-];
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function FilterChip({ label, active, onClick }) {
-    return (
-        <span
-            onClick={onClick}
-            className={`
-        px-4 py-1.5 rounded-full text-[0.6875rem] font-bold uppercase tracking-widest
-        cursor-pointer transition-all whitespace-nowrap
-        ${
-                active
-                    ? "bg-surface-container-highest text-[#e0e0fc] hover:bg-primary hover:text-on-primary"
-                    : "bg-surface-container text-[#e0e0fc] hover:bg-surface-container-highest"
-            }
-      `}
-        >
-      {label}
-    </span>
-    );
+function placeHasTag(place, tagId) {
+  if (!tagId) return true;
+  const ids = place?.idTags;
+  if (Array.isArray(ids) && ids.some((id) => id === tagId)) return true;
+  const tags = place?.tags;
+  if (!Array.isArray(tags)) return false;
+  return tags.some((t) => t && (t.id === tagId));
 }
 
 function PlaceItem({ place, active, onClick }) {
-    const displayName = place.name || place.nome || "Local sem nome";
-    const displaySubtitle =
-        place.subtitle ||
-        [place?.endereco?.logradouro, place?.endereco?.cidade, place?.endereco?.estado]
-            .filter(Boolean)
-            .join(" - ");
+  const displayName = place.name || place.nome || "Local sem nome";
+  const displayAddr =
+    place.subtitle ||
+    [place?.endereco?.logradouro, place?.endereco?.cidade]
+      .filter(Boolean)
+      .join(' · ');
 
-    return (
-        <div
-            onClick={onClick}
-            className={`
-        group flex items-center gap-4 px-4 py-3 rounded-xl cursor-pointer
-        transition-all hover:bg-surface-container-high border-l-4
-        ${active ? "bg-surface-container border-primary" : "border-transparent"}
-      `}
-        >
-            {/* Thumbnail */}
-            <div className="w-12 h-12 rounded-lg bg-surface-container-highest flex-shrink-0 overflow-hidden">
-                {place.img ? (
-                    <img
-                        src={place.img}
-                        alt={place.alt || displayName}
-                        className="w-full h-full object-cover"
-                    />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[#e0e0fc] opacity-60">
-                        <span className="material-symbols-outlined text-base">location_on</span>
-                    </div>
-                )}
-            </div>
-
-            {/* Text */}
-            <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-[#e0e0fc] truncate">{displayName}</h3>
-                <p className="text-xs text-[#e0e0fc] opacity-70 truncate">
-                    {displaySubtitle || "Endereco nao informado"}
-                </p>
-            </div>
-
-            {/* Pin icon — only for pinned items */}
-            {place.pinned && (
-                <span
-                    className="material-symbols-outlined text-primary text-sm"
-                    style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-          push_pin
-        </span>
-            )}
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        display: 'grid', gridTemplateColumns: '30px 1fr auto', alignItems: 'center',
+        gap: 10, padding: active ? '10px 12px 10px 9px' : '10px 12px',
+        borderRadius: 10, cursor: 'pointer', position: 'relative',
+        background: active ? 'rgba(255,107,94,0.08)' : 'transparent',
+        borderLeft: active ? '3px solid var(--coral)' : '3px solid transparent',
+        transition: 'background 0.1s',
+      }}
+      onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
+      onMouseLeave={e => { if (!active) e.currentTarget.style.background = ''; }}
+    >
+      <div style={{
+        width: 26, height: 26, borderRadius: '50%',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        border: `1px solid ${active ? 'var(--coral)' : 'var(--line)'}`,
+        color: active ? 'var(--coral)' : 'var(--ink-3)', flexShrink: 0,
+      }}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 12, height: 12 }}>
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+          <circle cx="12" cy="9" r="2.5" />
+        </svg>
+      </div>
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)', marginBottom: 1 }}>
+          {displayName}
         </div>
-    );
+        <div style={{
+          fontSize: 11, color: 'var(--ink-3)', whiteSpace: 'nowrap',
+          overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 180,
+        }}>
+          {displayAddr || 'Endereço não informado'}
+        </div>
+      </div>
+      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: 'var(--ink-4)' }} />
+    </div>
+  );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+export default function CollectionSidebar({
+  onClose,
+  isOpen = false,
+  onPlaceSelect,
+  selectedPlaceId = null,
+}) {
+  const [activeTagId, setActiveTagId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [places, setPlaces] = useState([]);
+  const [tags, setTags] = useState([]);
+  const { flyTo } = useMapActions();
 
-export default function CollectionSidebar({ onClose, isOpen = false }) {
-    const [activeFilter, setActiveFilter] = useState("All");
-    const [places, setPlaces] = useState(PLACES);
-    const [activePlace, setActivePlace] = useState(PLACES[0]?.id || null);
+  const activePlace = useMemo(
+    () => selectedPlaceId ?? places[0]?.id ?? null,
+    [places, selectedPlaceId]
+  );
 
-    useEffect(() => {
-        let mounted = true;
+  useEffect(() => {
+    let mounted = true;
+    LocaisService.getAll()
+      .then(r => r.json())
+      .then(data => {
+        if (!mounted || !Array.isArray(data)) return;
+        setPlaces(data);
+      })
+      .catch(() => {});
+    return () => { mounted = false; };
+  }, []);
 
-        LocaisService.getAll()
-            .then((response) => response.json())
-            .then((data) => {
-                if (!mounted || !Array.isArray(data)) return;
-                setPlaces(data);
-                if (data.length > 0) {
-                    setActivePlace(data[0].id);
+  useEffect(() => {
+    let mounted = true;
+    TagService.getAll()
+      .then((r) => {
+        if (!r.ok) return [];
+        return r.json();
+      })
+      .then((data) => {
+        if (!mounted || !Array.isArray(data)) return;
+        setTags(data);
+      })
+      .catch(() => {});
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const filteredPlaces = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    let list = places.filter((place) => placeHasTag(place, activeTagId));
+
+    if (!query) return list;
+
+    return list.filter((place) => {
+      const name = (place?.name || place?.nome || "").toLowerCase();
+      const street = (place?.endereco?.logradouro || "").toLowerCase();
+      const city = (place?.endereco?.cidade || "").toLowerCase();
+      const subtitle = (place?.subtitle || "").toLowerCase();
+      return (
+        name.includes(query) ||
+        street.includes(query) ||
+        city.includes(query) ||
+        subtitle.includes(query)
+      );
+    });
+  }, [places, searchQuery, activeTagId]);
+
+  const handlePlaceClick = (place) => {
+    const latitude = Number.parseFloat(place?.coordenadas?.latitude);
+    const longitude = Number.parseFloat(place?.coordenadas?.longitude);
+
+    if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+      flyTo([latitude, longitude], 17);
+    }
+
+    onPlaceSelect?.(place);
+  };
+
+  return (
+    <div style={{
+      position: 'fixed', top: 18, left: 274, width: 320,
+      maxHeight: 'calc(100vh - 140px)',
+      background: 'var(--bg-2)', border: '1px solid var(--line)',
+      borderRadius: 16, display: 'flex', flexDirection: 'column',
+      overflow: 'hidden', zIndex: 35,
+      boxShadow: '0 30px 60px rgba(0,0,0,0.4)',
+      transform: isOpen ? 'translateX(0) scale(1)' : 'translateX(-16px) scale(0.97)',
+      opacity: isOpen ? 1 : 0,
+      pointerEvents: isOpen ? 'auto' : 'none',
+      transition: 'transform 0.2s ease, opacity 0.2s ease',
+    }}>
+      {/* Header */}
+      <div style={{
+        padding: '18px 20px 14px', display: 'flex', alignItems: 'center',
+        gap: 10, borderBottom: '1px solid var(--line-soft)',
+      }}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+          style={{ width: 16, height: 16, color: 'var(--coral)', flexShrink: 0 }}>
+          <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
+        </svg>
+        <div style={{
+          fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 17,
+          flex: 1, color: 'var(--ink)',
+        }}>
+          Saved Places
+        </div>
+        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'var(--ink-3)' }}>
+          {filteredPlaces.length}
+        </span>
+        <button
+          onClick={onClose}
+          style={{
+            width: 28, height: 28, borderRadius: 8, background: 'transparent',
+            border: '1px solid var(--line)', color: 'var(--ink-2)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+          }}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 12, height: 12 }}>
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Tag filters from API */}
+      <div style={{
+        display: 'flex', gap: 4, padding: '12px 14px',
+        borderBottom: '1px solid var(--line-soft)', overflowX: 'auto',
+      }} className="scrollbar-hide">
+        <span
+          role="button"
+          tabIndex={0}
+          onClick={() => setActiveTagId(null)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setActiveTagId(null);
+            }
+          }}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 10,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            padding: "7px 11px",
+            borderRadius: 999,
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+            background: activeTagId == null ? "rgba(255,255,255,0.06)" : "transparent",
+            color: activeTagId == null ? "var(--ink)" : "var(--ink-3)",
+            border: activeTagId == null ? "1px solid var(--line)" : "1px solid transparent",
+            transition: "all 0.12s",
+          }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: 14, color: "var(--ink-2)" }}>
+            grid_view
+          </span>
+          Todos
+        </span>
+        {tags.map((tag) => {
+          const color = resolveTagColor(tag?.cor);
+          const active = activeTagId === tag.id;
+          return (
+            <span
+              key={tag.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => setActiveTagId(tag.id)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setActiveTagId(tag.id);
                 }
-            })
-            .catch(() => {
-                // Keeps the mock list as fallback when API is unavailable.
-            });
-
-        return () => {
-            mounted = false;
-        };
-    }, []);
-
-    return (
-        <>
-            {/* Google Fonts + Material Symbols — inject once if not already in the document */}
-            <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
-
-        .material-symbols-outlined {
-          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-          vertical-align: middle;
-        }
-
-        /* Custom scrollbar */
-        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
-        .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-        .sidebar-scroll::-webkit-scrollbar-thumb { background: #313349; border-radius: 10px; }
-
-        /* Hide scrollbar on filter row */
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
-
-            <aside
-                className={`fixed left-0 top-0 bottom-0 ml-60 pl-6 w-1/5 bg-[#181A2E] bg-surface-container-low flex flex-col z-0 shadow-2xl text-[#e0e0fc] transition-transform duration-300 ease-out ${
-                    isOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"
-                }`}
-                style={{ fontFamily: "Manrope, sans-serif" }}
+              }}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 10,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                padding: "7px 11px",
+                borderRadius: 999,
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+                background: active ? tagChipTint(tag?.cor, 0.18) : "transparent",
+                color: active ? color : "var(--ink-3)",
+                border: active ? `1px solid ${color}` : "1px solid transparent",
+                transition: "all 0.12s",
+              }}
             >
-                {/* ── Header ── */}
-                <div className="px-6 py-8 flex flex-col gap-8">
-                    {/* Title row */}
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-              <span
-                  className="material-symbols-outlined text-primary text-3xl"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                bookmark
+              <span className="material-symbols-outlined" style={{ fontSize: 14, color }}>
+                label
               </span>
-                            <h1 className="text-xl font-extrabold tracking-tight text-[#e0e0fc]">
-                                Saved Places
-                            </h1>
-                        </div>
+              {tag.nome || "Tag"}
+            </span>
+          );
+        })}
+      </div>
 
-                        <button
-                            onClick={onClose}
-                            className="p-2 hover:bg-surface-container-highest rounded-full transition-colors text-[#e0e0fc] group"
-                        >
-              <span className="material-symbols-outlined text-2xl group-hover:text-primary transition-colors">
-                close
-              </span>
-                        </button>
-                    </div>
+      {/* Search */}
+      <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--line-soft)' }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 9, padding: '9px 12px',
+          background: 'var(--bg-4)', borderRadius: 10, color: 'var(--ink-3)', fontSize: 12,
+        }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+            style={{ width: 13, height: 13, flexShrink: 0 }}>
+            <path d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z" />
+          </svg>
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar nas coleções..."
+            style={{
+              border: 0,
+              outline: "none",
+              background: "transparent",
+              color: "var(--ink)",
+              fontSize: 12,
+              width: "100%",
+            }}
+          />
+        </div>
+      </div>
 
-                    {/* Filter chips */}
-                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                        {FILTERS.map((f) => (
-                            <FilterChip
-                                key={f}
-                                label={f}
-                                active={activeFilter === f}
-                                onClick={() => setActiveFilter(f)}
-                            />
-                        ))}
-                    </div>
-                </div>
+      {/* List */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: 8 }} className="sidebar-scroll">
+        {filteredPlaces.length === 0 ? (
+          <div style={{
+            textAlign: 'center', padding: '32px 16px',
+            color: 'var(--ink-3)', fontSize: 13,
+          }}>
+            {places.length === 0 ? "Nenhum local salvo" : "Nenhum resultado encontrado"}
+          </div>
+        ) : (
+          filteredPlaces.map(place => (
+            <PlaceItem
+              key={place.id}
+              place={place}
+              active={activePlace === place.id}
+              onClick={() => handlePlaceClick(place)}
+            />
+          ))
+        )}
+      </div>
 
-                {/* ── List ── */}
-                <div className="flex-1 overflow-y-auto px-2 pb-6 space-y-1 sidebar-scroll">
-
-                    {places.map((place) => (
-                        <PlaceItem
-                            key={place.id}
-                            place={place}
-                            active={activePlace === place.id}
-                            onClick={() => setActivePlace(place.id)}
-                        />
-                    ))}
-                </div>
-
-                {/* ── Footer ── */}
-                <div className="p-6 bg-surface-container-lowest flex items-center justify-between">
-                    <button className="flex items-center gap-2 text-[#e0e0fc] transition-all text-xs font-bold uppercase tracking-widest">
-                        <span className="material-symbols-outlined text-lg">add</span>
-                        New List
-                    </button>
-                </div>
-            </aside>
-        </>
-    );
+      {/* Footer */}
+      <div style={{
+        padding: '10px 14px', borderTop: '1px solid var(--line-soft)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      }}>
+        <button style={{
+          display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px',
+          borderRadius: 999, background: 'rgba(255,107,94,0.12)',
+          border: '1px solid rgba(255,107,94,0.18)', color: 'var(--coral)',
+          fontSize: 12, cursor: 'pointer',
+        }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"
+            style={{ width: 11, height: 11 }}>
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          New list
+        </button>
+        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: 'var(--ink-3)' }}>
+          Sorted · nome ↓
+        </span>
+      </div>
+    </div>
+  );
 }
