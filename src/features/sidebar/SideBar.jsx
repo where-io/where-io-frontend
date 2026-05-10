@@ -1,20 +1,32 @@
+import { useNavigate } from "react-router-dom";
 import NavLink from "../../components/navlink/NavLink.jsx";
 import RedButton from '../button/RedButton.jsx';
+import { useAuth } from "../../context/AuthContext.jsx";
 
-export default function SideNavBar({ onAddLocation, onOpenSavedPlaces, onOpenFriends, onOpenSettings, activeNav }) {
+export default function SideNavBar({
+  onAddLocation,
+  onOpenSavedPlaces,
+  onOpenFriends,
+  onOpenSettings,
+  onExplore,
+  activeNav,
+}) {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  function handleLogout() {
+    logout();
+    navigate("/login", { replace: true });
+  }
   const mainNav = [
-    { icon: "explore",  label: "Explore",  active: activeNav === "Explore" },
+    { icon: "explore", label: "Explore", active: activeNav === "Explore", onClick: onExplore },
     { icon: "bookmark", label: "Coleção",   active: activeNav === "Lugares Salvos", onClick: onOpenSavedPlaces },
     { icon: "people",   label: "Amigos",    active: activeNav === "Amigos", onClick: onOpenFriends },
   ];
 
-  const quickNav = [
-    { icon: "search", label: "Buscar coordenada", badge: "⌘K" },
-    { icon: "layers", label: "Camadas" },
-  ];
-
   const footerNav = [
     { icon: "settings", label: "Settings", onClick: onOpenSettings },
+    { icon: "logout", label: "Sair", onClick: handleLogout },
     { icon: "help",     label: "Help" },
   ];
 
@@ -45,35 +57,6 @@ export default function SideNavBar({ onAddLocation, onOpenSavedPlaces, onOpenFri
       {/* Main nav */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {mainNav.map(item => <NavLink key={item.label} {...item} />)}
-      </div>
-
-      {/* Quick section label */}
-      <div style={{
-        fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
-        letterSpacing: 'var(--tracking)', color: 'var(--ink-4)',
-        textTransform: 'uppercase', margin: '18px 14px 8px',
-      }}>
-        // quick
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {quickNav.map(item => (
-          <div key={item.label} style={{
-            display: 'flex', alignItems: 'center', gap: 12, padding: '9px 14px',
-            borderRadius: 10, fontSize: 13, color: 'var(--ink-2)', cursor: 'default',
-          }}>
-            <span className="material-symbols-outlined" style={{ fontSize: 15 }}>{item.icon}</span>
-            <span>{item.label}</span>
-            {item.badge && (
-              <span style={{
-                marginLeft: 'auto', fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 10, letterSpacing: '0.1em', color: 'var(--ink-3)',
-              }}>
-                {item.badge}
-              </span>
-            )}
-          </div>
-        ))}
       </div>
 
       {/* Spacer */}

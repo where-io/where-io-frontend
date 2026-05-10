@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LocaisService } from "../../service/LocaisService";
 import { TagService } from "../../service/TagService";
 import { useMapActions } from "../mapa/MapContext.jsx";
@@ -42,7 +42,7 @@ function placeHasTag(place, tagId) {
   return tags.some((t) => t && (t.id === tagId));
 }
 
-function PlaceItem({ place, active, onClick }) {
+function PlaceItem({ place, active, onClick, onRemove, exiting, onExitAnimationEnd }) {
   const displayName = place.name || place.nome || "Local sem nome";
   const displayAddr =
     place.subtitle ||
@@ -52,17 +52,27 @@ function PlaceItem({ place, active, onClick }) {
 
   return (
     <div
-      onClick={onClick}
+      className={exiting ? "collection-place-item-wrap--exit" : undefined}
+      onAnimationEnd={(e) => {
+        if (!exiting) return;
+        if (e.target !== e.currentTarget) return;
+        if (!String(e.animationName || "").includes("collection-place-exit")) return;
+        onExitAnimationEnd?.();
+      }}
+      style={{ borderRadius: 10 }}
+    >
+    <div
+      onClick={exiting ? undefined : onClick}
       style={{
         display: 'grid', gridTemplateColumns: '30px 1fr auto', alignItems: 'center',
         gap: 10, padding: active ? '10px 12px 10px 9px' : '10px 12px',
-        borderRadius: 10, cursor: 'pointer', position: 'relative',
+        borderRadius: 10, cursor: exiting ? 'default' : 'pointer', position: 'relative',
         background: active ? 'rgba(255,107,94,0.08)' : 'transparent',
         borderLeft: active ? '3px solid var(--coral)' : '3px solid transparent',
         transition: 'background 0.1s',
       }}
-      onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
-      onMouseLeave={e => { if (!active) e.currentTarget.style.background = ''; }}
+      onMouseEnter={e => { if (!active && !exiting) e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
+      onMouseLeave={e => { if (!active && !exiting) e.currentTarget.style.background = ''; }}
     >
       <div style={{
         width: 26, height: 26, borderRadius: '50%',
@@ -79,29 +89,75 @@ function PlaceItem({ place, active, onClick }) {
         <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)', marginBottom: 1 }}>
           {displayName}
         </div>
-        <div style={{
-          fontSize: 11, color: 'var(--ink-3)', whiteSpace: 'nowrap',
-          overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 180,
-        }}>
+      <div style={{
+        fontSize: 11, color: 'var(--ink-3)', whiteSpace: 'nowrap',
+        overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 180,
+      }}>
           {displayAddr || 'Endereço não informado'}
         </div>
       </div>
-      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: 'var(--ink-4)' }} />
+      <button
+        type="button"
+        aria-label="Remover da coleção"
+        disabled={exiting}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (exiting) return;
+          onRemove?.(place);
+        }}
+        style={{
+          width: 28,
+          height: 28,
+          borderRadius: 8,
+          background: 'transparent',
+          border: '1px solid transparent',
+          color: 'var(--coral)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: exiting ? 'not-allowed' : 'pointer',
+          flexShrink: 0,
+          opacity: exiting ? 0.5 : 1,
+          transition: 'background 0.12s, border-color 0.12s, opacity 0.15s ease-out',
+        }}
+        onMouseEnter={(e) => {
+          if (exiting) return;
+          e.currentTarget.style.background = 'rgba(255,107,94,0.12)';
+          e.currentTarget.style.borderColor = 'rgba(255,107,94,0.25)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'transparent';
+          e.currentTarget.style.borderColor = 'transparent';
+        }}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 13, height: 13 }}>
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
     </div>
   );
 }
 
 export default function CollectionSidebar({
+  /** Quando definido (ex.: estado do Home), a lista espelha esse array e atualiza ao refetch do pai. */
+  places: placesProp,
   onClose,
   isOpen = false,
   onPlaceSelect,
+  onPlaceRemoved,
   selectedPlaceId = null,
 }) {
   const [activeTagId, setActiveTagId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [places, setPlaces] = useState([]);
+  const [placesInternal, setPlacesInternal] = useState([]);
   const [tags, setTags] = useState([]);
+  const [removingPlaceId, setRemovingPlaceId] = useState(null);
+  const removalFinalizeGuardRef = useRef(null);
   const { flyTo } = useMapActions();
+
+  const parentFeedsPlaces = placesProp !== undefined;
+  const places = parentFeedsPlaces ? placesProp : placesInternal;
 
   const activePlace = useMemo(
     () => selectedPlaceId ?? places[0]?.id ?? null,
@@ -109,16 +165,17 @@ export default function CollectionSidebar({
   );
 
   useEffect(() => {
+    if (parentFeedsPlaces) return undefined;
     let mounted = true;
     LocaisService.getAll()
       .then(r => r.json())
       .then(data => {
         if (!mounted || !Array.isArray(data)) return;
-        setPlaces(data);
+        setPlacesInternal(data);
       })
       .catch(() => {});
     return () => { mounted = false; };
-  }, []);
+  }, [parentFeedsPlaces]);
 
   useEffect(() => {
     let mounted = true;
@@ -158,6 +215,7 @@ export default function CollectionSidebar({
   }, [places, searchQuery, activeTagId]);
 
   const handlePlaceClick = (place) => {
+    if (removingPlaceId) return;
     const latitude = Number.parseFloat(place?.coordenadas?.latitude);
     const longitude = Number.parseFloat(place?.coordenadas?.longitude);
 
@@ -166,6 +224,41 @@ export default function CollectionSidebar({
     }
 
     onPlaceSelect?.(place);
+  };
+
+  const finalizePlaceRemoval = useCallback(
+    (place) => {
+      const id = place?.id;
+      if (!id) return;
+      if (removalFinalizeGuardRef.current === id) return;
+      removalFinalizeGuardRef.current = id;
+      setRemovingPlaceId(null);
+      if (!parentFeedsPlaces) {
+        setPlacesInternal((prev) => prev.filter((p) => p.id !== id));
+      }
+      onPlaceRemoved?.(place);
+    },
+    [onPlaceRemoved, parentFeedsPlaces]
+  );
+
+  const handleRemovePlace = (place) => {
+    const id = place?.id;
+    if (!id || removingPlaceId) return;
+    removalFinalizeGuardRef.current = null;
+    LocaisService.delete(id)
+      .then((res) => {
+        if (!res.ok) return;
+        const reduceMotion =
+          typeof window !== "undefined" &&
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reduceMotion) {
+          finalizePlaceRemoval(place);
+          return;
+        }
+        setRemovingPlaceId(id);
+        window.setTimeout(() => finalizePlaceRemoval(place), 420);
+      })
+      .catch(() => {});
   };
 
   return (
@@ -334,7 +427,10 @@ export default function CollectionSidebar({
               key={place.id}
               place={place}
               active={activePlace === place.id}
+              exiting={removingPlaceId === place.id}
+              onExitAnimationEnd={() => finalizePlaceRemoval(place)}
               onClick={() => handlePlaceClick(place)}
+              onRemove={handleRemovePlace}
             />
           ))
         )}

@@ -57,15 +57,18 @@ export default function CadastroVisita({ idLocalVar, onClose, onSaved }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setIsSubmitting(true);
-    const payload = { dataVisita: data, avaliacao, comentario, idLocal: idLocalVar };
-    const response = await VisitaService.create(payload);
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(`Falha ao salvar visita (${response.status}): ${errorBody}`);
+    try {
+      const payload = { dataVisita: data, avaliacao, comentario, idLocal: idLocalVar };
+      const response = await VisitaService.create(payload);
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`Falha ao salvar visita (${response.status}): ${errorBody}`);
+      }
+      if (onSaved) onSaved(idLocalVar);
+      if (onClose) onClose();
+    } finally {
+      setIsSubmitting(false);
     }
-    if (onSaved) onSaved(idLocalVar);
-    if (onClose) onClose();
-    setIsSubmitting(false);
   }
 
   return (

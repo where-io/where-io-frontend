@@ -12,6 +12,19 @@ import CadastroVisita from "../features/cadastroVisita/CadastroVisita.jsx";
 import {LocaisService} from "../service/LocaisService";
 import {VisitaService} from "../service/VisitaService";
 
+function formatEndereco(endereco) {
+    if (!endereco || typeof endereco !== "object") return "—";
+    const cidadeEstado = [endereco.cidade, endereco.estado].filter(Boolean).join(" - ");
+    const parts = [
+        endereco.logradouro,
+        endereco.bairro,
+        cidadeEstado || null,
+        endereco.cep,
+        endereco.pais,
+    ].filter(Boolean);
+    return parts.length ? parts.join(", ") : "—";
+}
+
 function Home() {
     const [showCadastroLocal, setShowCadastroLocal] = useState(false);
     const [showCadastroVisitas, setShowCadastroVisitas] = useState(false);
@@ -41,10 +54,17 @@ function Home() {
     }, []);
 
     const fetchLocations = useCallback(() => {
-
         LocaisService.getAll()
             .then((res) => res.json())
-            .then((data) => setLocations(data))
+            .then((data) => {
+                if (!Array.isArray(data)) return;
+                setLocations(data);
+                setSelectedLocation((prev) => {
+                    if (!prev?.id) return prev;
+                    const upd = data.find((l) => l.id === prev.id);
+                    return upd ? { ...prev, ...upd } : prev;
+                });
+            })
             .catch((err) => console.error(err));
     }, []);
 
@@ -71,6 +91,22 @@ function Home() {
         };
     }, []);
 
+    const handleExploreNav = useCallback(() => {
+        setActiveNav("Explore");
+        setIsSavedPlacesOpen(false);
+        setIsFriendsOpen(false);
+        setIsSettingsModalOpen(false);
+        setShowCadastroLocal(false);
+        setShowCadastroVisitas(false);
+        setIsLocationSidebarOpen(false);
+        if (closeSidebarTimeoutRef.current) {
+            clearTimeout(closeSidebarTimeoutRef.current);
+        }
+        closeSidebarTimeoutRef.current = setTimeout(() => {
+            setSelectedLocation(null);
+        }, 300);
+    }, []);
+
     const handleLocationSelect = useCallback((location) => {
         if (closeSidebarTimeoutRef.current) {
             clearTimeout(closeSidebarTimeoutRef.current);
@@ -79,6 +115,17 @@ function Home() {
         setSelectedLocation(location);
         setIsLocationSidebarOpen(true);
     }, []);
+
+    const handlePlaceRemovedFromCollection = useCallback(
+        (place) => {
+            fetchLocations();
+            if (selectedLocation?.id === place?.id) {
+                setSelectedLocation(null);
+                setIsLocationSidebarOpen(false);
+            }
+        },
+        [fetchLocations, selectedLocation?.id]
+    );
 
     const selectedLocationData = useMemo(() => {
         if (!selectedLocation) return null;
@@ -93,6 +140,7 @@ function Home() {
                 selectedLocation?.imagemUrl ||
                 "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop",
             imageAlt: selectedLocation?.nome || "Local selecionado",
+            address: formatEndereco(selectedLocation?.endereco),
             coordinates,
             elevation: selectedLocation?.elevacao || "—",
             visibility: selectedLocation?.visibilidade || "—",
@@ -116,6 +164,7 @@ function Home() {
                 />
                 <Sidebar
                     onAddLocation={openCadastroLocal}
+                    onExplore={handleExploreNav}
                     onOpenSavedPlaces={() => {
                         setIsSavedPlacesOpen(true);
                         setIsFriendsOpen(false);
@@ -134,9 +183,11 @@ function Home() {
                     onClose={() => setIsSettingsModalOpen(false)}
                 />
                 <CollectionSidebar
+                    places={locations}
                     isOpen={isSavedPlacesOpen}
                     selectedPlaceId={selectedLocation?.id}
                     onPlaceSelect={handleLocationSelect}
+                    onPlaceRemoved={handlePlaceRemovedFromCollection}
                     onClose={() => {
                         setIsSavedPlacesOpen(false);
                         setActiveNav("Explore");
@@ -152,6 +203,9 @@ function Home() {
                 {selectedLocationData && (
                     <LocationSidebar
                         data={selectedLocationData}
+                        location={selectedLocation}
+                        localId={selectedLocation?.id}
+                        onTagsChanged={fetchLocations}
                         onAddVisit={openCadastroVisitas}
                         onClose={() => {
                             setIsLocationSidebarOpen(false);

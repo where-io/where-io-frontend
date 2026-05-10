@@ -4,6 +4,7 @@ import FormSign from "../../components/navlink/Form/FormSign.jsx";
 import FormField from "../../components/navlink/Form/FormField.jsx";
 import { LocaisService } from "../../service/LocaisService";
 import { TagService } from "../../service/TagService";
+import { usePopup } from "../../context/PopupContext.jsx";
 
 function useGooglePlaces() {
   const sessionTokenRef = useRef(null);
@@ -170,6 +171,7 @@ function StyledInput({ value, onChange, placeholder, type = "text", readOnly, st
 export default function CadastroLocal({ onClose, onSaved }) {
   const ignoreNextQueryRef = useRef(false);
   const { flyTo } = useMapActions();
+  const { showPopup } = usePopup();
   const prefersReducedMotion = usePrefersReducedMotion();
 
   const [query, setQuery] = useState("");
@@ -241,36 +243,46 @@ export default function CadastroLocal({ onClose, onSaved }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setIsSubmitting(true);
-    const enderecoParsed = parseEndereco(address);
-    const payload = {
-      nome: name,
-      endereco: {
-        logradouro: enderecoParsed.rua, bairro: enderecoParsed.bairro,
-        cidade: enderecoParsed.cidade, estado: enderecoParsed.estado,
-        cep: enderecoParsed.cep, pais: "Brasil",
-      },
-      coordenadas: {
-        latitude: coords.split(",")[0]?.trim(),
-        longitude: coords.split(",")[1]?.trim(),
-      },
-      idTags: selectedTags.map((t) => (t.id && String(t.id).trim()) || (t.nome && t.nome.trim())).filter(Boolean),
-      tags: selectedTags.map(({ id, nome, cor }) => ({
-        ...(id ? { id } : {}),
-        nome,
-        cor: resolveTagHex(cor),
-      })),
-    };
-    const response = await LocaisService.create(payload);
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(`Falha ao salvar local (${response.status}): ${errorBody}`);
-    }
-    if (onSaved) onSaved();
-    if (onClose) onClose();
-    setIsSubmitting(false);
-    if (coords && coords.includes(",")) {
-      const [lat, lng] = coords.split(",").map(c => parseFloat(c.trim()));
-      flyTo([lat, lng], 17);
+    try {
+      const enderecoParsed = parseEndereco(address);
+      const payload = {
+        nome: name,
+        endereco: {
+          logradouro: enderecoParsed.rua, bairro: enderecoParsed.bairro,
+          cidade: enderecoParsed.cidade, estado: enderecoParsed.estado,
+          cep: enderecoParsed.cep, pais: "Brasil",
+        },
+        coordenadas: {
+          latitude: coords.split(",")[0]?.trim(),
+          longitude: coords.split(",")[1]?.trim(),
+        },
+        idTags: selectedTags.map((t) => (t.id && String(t.id).trim()) || (t.nome && t.nome.trim())).filter(Boolean),
+        tags: selectedTags.map(({ id, nome, cor }) => ({
+          ...(id ? { id } : {}),
+          nome,
+          cor: resolveTagHex(cor),
+        })),
+      };
+      const response = await LocaisService.create(payload);
+      if (!response.ok) {
+        showPopup('error', {
+          code: response.status,
+          message: 'Não foi possível salvar o local. Tente novamente.',
+        });
+        setIsSubmitting(false);
+        return;
+      }
+      showPopup('location', { name, address, coords });
+      if (onSaved) onSaved();
+      if (onClose) onClose();
+      if (coords && coords.includes(",")) {
+        const [lat, lng] = coords.split(",").map(c => parseFloat(c.trim()));
+        flyTo([lat, lng], 17);
+      }
+    } catch (err) {
+      showPopup('error', { message: err?.message || 'Erro de rede. Verifique se a API está no ar.' });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -668,21 +680,32 @@ export default function CadastroLocal({ onClose, onSaved }) {
                               }
                             }}
                           />
-                          <input
-                            type="color"
-                            value={tagColorDraft}
-                            onChange={(e) => setTagColorDraft(e.target.value)}
-                            aria-label="Cor"
+                          <label
+                            className="tag-color-field"
+                            htmlFor="cadastro-local-tag-color"
+                            title="Escolher cor"
                             style={{
-                              width: 44,
+                              display: 'block',
+                              flexShrink: 0,
+                              width: 81,
                               height: 38,
-                              borderRadius: 10,
-                              border: '1px solid var(--line)',
-                              background: 'var(--bg-4)',
-                              padding: 0,
+                              borderRadius: 999,
+                              border: '1px solid rgba(255,107,94,0.22)',
+                              overflow: 'hidden',
                               cursor: 'pointer',
+                              boxSizing: 'border-box',
                             }}
-                          />
+                          >
+                            <input
+                              id="cadastro-local-tag-color"
+                              className="tag-color-input"
+                              type="color"
+                              value={tagColorDraft}
+                              onChange={(e) => setTagColorDraft(e.target.value)}
+                              aria-label="Cor"
+                              style={{ borderRadius: 999 }}
+                            />
+                          </label>
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>

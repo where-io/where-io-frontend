@@ -1,37 +1,73 @@
-const BASE_URL = process.env.REACT_APP_API_URL
-console.log("URL:" + BASE_URL)
+import { apiFetch } from "./apiClient";
 
 export class LocaisService {
+  static getAll() {
+    return apiFetch("/api/local/all", {
+      method: "GET",
+    });
+  }
 
-    static getAll() {
-        return fetch(`${BASE_URL}/api/local/all`,
-        {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                }
-            }
-        )
+  static async create(payload) {
+    return apiFetch("/api/local", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  static update(id, payload) {
+    return apiFetch(`/api/local/${encodeURIComponent(id)}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  /** Multipart upload; resposta JSON: `{ fileName, urlPath }` (urlPath ex.: `/media/...`). */
+  static uploadFile(file, idLocal) {
+    const formData = new FormData();
+    formData.append("file", file);
+    if (idLocal) {
+      formData.append("idLocal", idLocal);
     }
+    return apiFetch("/api/files/upload", {
+      method: "POST",
+      body: formData,
+    });
+  }
 
-    static async create(payload) {
+  /** Lista fotos do local (`GET /api/files/local/{id}/fotos`). */
+  static listLocalFotos(localId) {
+    return apiFetch(`/api/files/local/${encodeURIComponent(localId)}/fotos`, {
+      method: "GET",
+    });
+  }
 
-        return fetch(`${BASE_URL}/api/local`,
-        {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
-            }
-        )
-    }
+  static delete(id) {
+    return apiFetch(`/api/local/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+  }
 
-    static async update(id, payload) {
+  static getTags(localId) {
+    return apiFetch(`/api/local/${encodeURIComponent(localId)}/tags`, {
+      method: "GET",
+    });
+  }
 
-    }
+  static associateTag(localId, tagId) {
+    return apiFetch(
+      `/api/local/${encodeURIComponent(localId)}/tag/${encodeURIComponent(tagId)}`,
+      {
+        method: "POST",
+      }
+    );
+  }
 
-    static async delete(id) {
-
-    }
+  static dissociateTag(localId, tagId) {
+    return apiFetch(
+      `/api/local/${encodeURIComponent(localId)}/tag/${encodeURIComponent(tagId)}`,
+      {
+        method: "DELETE",
+      }
+    );
+  }
 }
