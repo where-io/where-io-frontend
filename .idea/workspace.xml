@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="b9f412ec-92c1-438e-a1b4-42617fd58bd5" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/SKILL.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/agents/openai.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/adapt.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/animate.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/audit.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/bolder.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/brand.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/clarify.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/cognitive-load.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/color-and-contrast.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/colorize.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/craft.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/critique.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/delight.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/distill.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/document.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/extract.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/harden.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/heuristics-scoring.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/interaction-design.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/layout.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/live.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/motion-design.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/onboard.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/optimize.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/overdrive.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/personas.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/polish.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/product.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/quieter.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/responsive-design.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/shape.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/spatial-design.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/teach.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/typeset.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/typography.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/reference/ux-writing.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/scripts/cleanup-deprecated.mjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/scripts/command-metadata.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/scripts/design-parser.mjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/scripts/detect-csp.mjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/scripts/is-generated.mjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/scripts/live-accept.mjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/scripts/live-browser.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/scripts/live-inject.mjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/scripts/live-poll.mjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/scripts/live-server.mjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/scripts/live-wrap.mjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/scripts/live.mjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/scripts/load-context.mjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/scripts/modern-screenshot.umd.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.agents/skills/impeccable/scripts/pin.mjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.claude/settings.local.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dockerignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/embuenado-app.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CLAUDE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PRODUCT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UPDATE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/nginx.conf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/postcss.config.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/favicon.ico" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/icons/uber.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/logo192.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/logo512.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/robots.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/skills-lock.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.test.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Popups/Popups.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Popups/Popups.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Toast/ToastStack.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/navlink/Form/FormField.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/navlink/Form/FormSign.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/navlink/NavLink.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/context/AuthContext.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/context/PopupContext.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/context/ToastContext.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/button/LightRedButton.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/button/RedButton.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/button/TextOnlyButton.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/cadastroLocal/CadastroLocal.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/cadastroLocal/search-component/SearchControl.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/cadastroLocal/search-component/SearchControl.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/cadastroVisita/CadastroVisita.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/grid/LightRedInfoCard.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/grid/LocalPhotosCarousel.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/grid/LocationInfoCard.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/mapa/MapContext.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/mapa/Mapa.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/mapa/Mapa.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/sidebar/CollectionSidebar.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/sidebar/FriendsSidebar.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/sidebar/LocationSidebar.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/sidebar/SettingsModal.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/sidebar/SideBar.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/index.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/logo.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/Home.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/Login.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/reportWebVitals.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/routes/AppRouter.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/routes/ProtectedRoute.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/AmigosService.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/LocaisService.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/TagService.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/VisitaService.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/apiBaseUrl.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/apiClient.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/authAccessStore.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/authRedirect.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/authService.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/authStorage.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/authTokens.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/jwtDecode.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/refreshCoordinator.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/refreshTokenCookie.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/setupTests.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tailwind.config.js" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_C:/dev/projetos/where-io/front" value="3DmA6BR8tSJVP7JMZKdwWof4Jvz" />
+    </persistenceIdMap>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 8,
+  "fromUser": false
+}]]></component>
+  <component name="ProjectId" id="3DmA6BR8tSJVP7JMZKdwWof4Jvz" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "v3-monorepo",
+    "last_opened_file_path": "C:/dev/projetos/where-io/front",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-3bd3a6803838-JavaScript-WS-261.22158.274" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="b9f412ec-92c1-438e-a1b4-42617fd58bd5" name="Changes" comment="" />
+      <created>1778876694592</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1778876694592</updated>
+      <workItem from="1778876695521" duration="1234000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
+  </component>
+</project>
