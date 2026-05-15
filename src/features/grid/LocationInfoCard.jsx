@@ -24,6 +24,32 @@ export default function LocationInfoCard({
     }
   };
 
+  const handleUber = (e) => {
+    e.stopPropagation();
+    if (!copySource) return;
+    const url = `https://m.uber.com/ul/?action=setPickup&dropoff[formatted_address]=${encodeURIComponent(copySource)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const actionBtnStyle = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: 30,
+    height: 30,
+    padding: 0,
+    borderRadius: 8,
+    border: "1px solid transparent",
+    background: "transparent",
+    cursor: "pointer",
+    transition: "background 0.12s, border-color 0.12s",
+    flexShrink: 0,
+    boxSizing: "border-box",
+  };
+
+  /** Uber: hit-area = área do logo (sem “anel” vazio em volta). */
+  const uberBtnPx = 34;
+
   return (
     <div
       role={interactive ? "button" : undefined}
@@ -88,6 +114,7 @@ export default function LocationInfoCard({
             display: 'flex',
             justifyContent: 'flex-start',
             alignItems: 'center',
+            gap: 8,
           }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -97,18 +124,8 @@ export default function LocationInfoCard({
             title="Copiar para a área de transferência"
             onClick={handleCopy}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 30,
-              height: 30,
-              padding: 0,
-              borderRadius: 8,
-              border: '1px solid transparent',
-              background: 'transparent',
+              ...actionBtnStyle,
               color: 'var(--coral)',
-              cursor: 'pointer',
-              transition: 'background 0.12s, border-color 0.12s',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = 'rgba(255,107,94,0.12)';
@@ -122,6 +139,44 @@ export default function LocationInfoCard({
             <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
               content_copy
             </span>
+          </button>
+          <button
+            type="button"
+            aria-label="Abrir Uber com este endereço como destino"
+            title="Pedir Uber até este endereço"
+            onClick={handleUber}
+            style={{
+              ...actionBtnStyle,
+              position: "relative",
+              width: uberBtnPx,
+              height: uberBtnPx,
+              borderRadius: 10,
+              overflow: "hidden",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.borderColor = 'transparent';
+            }}
+          >
+            <img
+              src={`${process.env.PUBLIC_URL || ""}/icons/uber.png`}
+              alt=""
+              draggable={false}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                display: "block",
+                objectFit: "cover",
+                pointerEvents: "none",
+                borderRadius: 10,
+              }}
+            />
           </button>
         </div>
       )}

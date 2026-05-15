@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { API_BASE_URL } from "../../service/apiClient";
 import { LocaisService } from "../../service/LocaisService";
 
@@ -29,6 +30,8 @@ export default function LocalPhotosCarousel({
   const [loading, setLoading] = useState(false);
   const [uploadBusy, setUploadBusy] = useState(false);
   const [error, setError] = useState(null);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [deleteBusy, setDeleteBusy] = useState(false);
   const fileInputRef = useRef(null);
 
   const load = useCallback(async () => {
@@ -87,6 +90,46 @@ export default function LocalPhotosCarousel({
   const handlePickAttachment = () => {
     fileInputRef.current?.click();
   };
+
+  const openDeleteConfirm = () => {
+    if (!current?.fileName || deleteBusy || uploadBusy) return;
+    setConfirmDeleteOpen(true);
+  };
+
+  const closeDeleteConfirm = () => {
+    if (deleteBusy) return;
+    setConfirmDeleteOpen(false);
+  };
+
+  const confirmDelete = async () => {
+    const name = current?.fileName;
+    if (!localId || !name) return;
+    setDeleteBusy(true);
+    setError(null);
+    try {
+      const res = await LocaisService.deleteLocalFoto(localId, name);
+      if (!res.ok) {
+        setError("Não foi possível remover a foto.");
+        return;
+      }
+      setConfirmDeleteOpen(false);
+      await load();
+      onPhotosChanged?.();
+    } catch {
+      setError("Não foi possível remover a foto.");
+    } finally {
+      setDeleteBusy(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!confirmDeleteOpen) return undefined;
+    const onKey = (ev) => {
+      if (ev.key === "Escape" && !deleteBusy) setConfirmDeleteOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [confirmDeleteOpen, deleteBusy]);
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
@@ -274,6 +317,49 @@ export default function LocalPhotosCarousel({
                 background: "rgba(0,0,0,0.25)",
               }}
             >
+              <button
+                type="button"
+                aria-label="Remover foto"
+                title="Remover foto"
+                disabled={uploadBusy || deleteBusy}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openDeleteConfirm();
+                }}
+                style={{
+                  position: "absolute",
+                  top: 8,
+                  left: 8,
+                  zIndex: 3,
+                  width: 28,
+                  height: 28,
+                  padding: 0,
+                  border: "none",
+                  borderRadius: 8,
+                  background: "rgba(0,0,0,0.55)",
+                  color: "var(--ink)",
+                  cursor: uploadBusy || deleteBusy ? "not-allowed" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: uploadBusy || deleteBusy ? 0.45 : 1,
+                  transition: "background 0.12s, color 0.12s",
+                }}
+                onMouseEnter={(e) => {
+                  if (!uploadBusy && !deleteBusy) {
+                    e.currentTarget.style.background = "rgba(255,107,94,0.35)";
+                    e.currentTarget.style.color = "#fff";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "rgba(0,0,0,0.55)";
+                  e.currentTarget.style.color = "var(--ink)";
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 16, lineHeight: 1 }}>
+                  close
+                </span>
+              </button>
               <img
                 src={src}
                 alt=""
@@ -297,7 +383,7 @@ export default function LocalPhotosCarousel({
                   onClick={goPrev}
                   style={{
                     position: "absolute",
-                    left: 8,
+                    left: 42,
                     top: "50%",
                     transform: "translateY(-50%)",
                     zIndex: 2,
@@ -389,6 +475,113 @@ export default function LocalPhotosCarousel({
           {error}
         </div>
       ) : null}
+
+      {confirmDeleteOpen &&
+        createPortal(
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="local-photo-delete-title"
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 10050,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 16,
+              boxSizing: "border-box",
+              background: "rgba(8,10,22,0.72)",
+              backdropFilter: "blur(6px)",
+            }}
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) closeDeleteConfirm();
+            }}
+          >
+            <div
+              style={{
+                width: "100%",
+                maxWidth: 280,
+                borderRadius: 12,
+                padding: "18px 18px 16px",
+                boxSizing: "border-box",
+                background: "var(--bg-4)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                boxShadow: "0 16px 48px rgba(0,0,0,0.45)",
+              }}
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <h2
+                id="local-photo-delete-title"
+                style={{
+                  margin: 0,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 11,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: "var(--ink-3)",
+                }}
+              >
+                Excluir foto
+              </h2>
+              <p
+                style={{
+                  margin: "12px 0 0",
+                  fontSize: 13,
+                  lineHeight: 1.45,
+                  color: "var(--ink)",
+                }}
+              >
+                Remover esta foto do local? Esta ação não pode ser desfeita.
+              </p>
+              <div
+                style={{
+                  display: "flex",
+                  gap: 8,
+                  justifyContent: "flex-end",
+                  marginTop: 18,
+                }}
+              >
+                <button
+                  type="button"
+                  disabled={deleteBusy}
+                  onClick={closeDeleteConfirm}
+                  style={{
+                    padding: "8px 14px",
+                    borderRadius: 8,
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    background: "transparent",
+                    color: "var(--ink-3)",
+                    fontSize: 12,
+                    fontFamily: "'JetBrains Mono', monospace",
+                    cursor: deleteBusy ? "not-allowed" : "pointer",
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  disabled={deleteBusy}
+                  onClick={confirmDelete}
+                  style={{
+                    padding: "8px 14px",
+                    borderRadius: 8,
+                    border: "none",
+                    background: "rgba(255,107,94,0.25)",
+                    color: "var(--coral)",
+                    fontSize: 12,
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontWeight: 600,
+                    cursor: deleteBusy ? "wait" : "pointer",
+                  }}
+                >
+                  {deleteBusy ? "Removendo…" : "Remover"}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

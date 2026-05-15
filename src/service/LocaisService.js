@@ -41,6 +41,15 @@ export class LocaisService {
     });
   }
 
+  /** Remove foto do local e do disco (`DELETE ... ?fileName=`). */
+  static deleteLocalFoto(localId, fileName) {
+    const qs = new URLSearchParams({ fileName });
+    return apiFetch(
+      `/api/files/local/${encodeURIComponent(localId)}/fotos?${qs.toString()}`,
+      { method: "DELETE" }
+    );
+  }
+
   static delete(id) {
     return apiFetch(`/api/local/${encodeURIComponent(id)}`, {
       method: "DELETE",
