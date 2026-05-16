@@ -324,14 +324,14 @@ export function ScreenMap() {
               }} />
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                 <View style={{
-                  width: 38, height: 38, borderRadius: 50,
-                  backgroundColor: 'rgba(255,255,255,0.05)',
-                  borderWidth: 1.5, borderColor: pinColor,
+                  width: 42, height: 42, borderRadius: 21,
+                  backgroundColor: pinColor + '38',
+                  borderWidth: 2, borderColor: pinColor,
                   alignItems: 'center', justifyContent: 'center',
                 }}>
                   <Text style={{
-                    fontFamily: fonts.display, fontSize: 13,
-                    color: pinColor,
+                    fontFamily: fonts.displayBold, fontSize: 14,
+                    color: '#fff', letterSpacing: 0.5,
                   }}>
                     {displayLocation.nome.slice(0, 2).toUpperCase()}
                   </Text>
