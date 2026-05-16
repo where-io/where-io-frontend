@@ -54,6 +54,7 @@ export function ScreenMap() {
 
   const slideAnim = useRef(new Animated.Value(0)).current;
   const [displayLocation, setDisplayLocation] = useState<Local | null>(null);
+  const handleMapPress = useCallback(() => setSelectedLocation(null), []);
 
   // ── User location ─────────────────────────────────────────
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -139,6 +140,8 @@ export function ScreenMap() {
     }
   }, [locations, loading, postCreateFocus]);
 
+  useEffect(() => () => { slideAnim.stopAnimation(); }, []);
+
   useEffect(() => {
     if (selectedLocation) {
       setDisplayLocation(selectedLocation);
@@ -172,6 +175,7 @@ export function ScreenMap() {
     : null;
 
   const headerTop = insets.top + 8;
+  const pinColor = displayLocation ? pinColor : W.coral;
 
   // ── Render ────────────────────────────────────────────────
   return (
@@ -192,7 +196,7 @@ export function ScreenMap() {
           flyToCoords={flyToCoords}
           userLocation={userLocation}
           userInitials={userInitials}
-          onMapPress={() => setSelectedLocation(null)}
+          onMapPress={handleMapPress}
         />
       )}
 
@@ -322,12 +326,12 @@ export function ScreenMap() {
                 <View style={{
                   width: 38, height: 38, borderRadius: 50,
                   backgroundColor: 'rgba(255,255,255,0.05)',
-                  borderWidth: 1.5, borderColor: pinColorForLocal(displayLocation),
+                  borderWidth: 1.5, borderColor: pinColor,
                   alignItems: 'center', justifyContent: 'center',
                 }}>
                   <Text style={{
                     fontFamily: fonts.display, fontSize: 13,
-                    color: pinColorForLocal(displayLocation),
+                    color: pinColor,
                   }}>
                     {displayLocation.nome.slice(0, 2).toUpperCase()}
                   </Text>
