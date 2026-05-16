@@ -1,0 +1,32 @@
+export const W = {
+  bg0: '#0A1028',
+  bg1: '#0E1530',
+  bg2: '#141B36',
+  bg3: '#1B2244',
+  bg4: '#242C55',
+  line: 'rgba(255,255,255,0.08)',
+  lineSoft: 'rgba(255,255,255,0.05)',
+  ink: '#F2F4FF',
+  ink2: '#B8BEDC',
+  ink3: '#6E7699',
+  ink4: '#4A5176',
+  coral: '#FF6B5E',
+  coralSoft: '#FF8674',
+  coralGlow: 'rgba(255,107,94,0.35)',
+  aqua: '#5EE0C8',
+  amber: '#F2B95C',
+  violet: '#8C7BFF',
+  rose: '#FF6B9D',
+  sky: '#5EB7FF',
+} as const;
+
+export const fonts = {
+  display: 'SpaceGrotesk_600SemiBold',
+  displayBold: 'SpaceGrotesk_700Bold',
+  displayMedium: 'SpaceGrotesk_500Medium',
+  body: 'Inter_400Regular',
+  bodyMedium: 'Inter_500Medium',
+  bodySemiBold: 'Inter_600SemiBold',
+  mono: 'JetBrainsMono_400Regular',
+  monoMedium: 'JetBrainsMono_500Medium',
+} as const;

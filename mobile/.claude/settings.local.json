@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\dev\\\\projetos\\\\where-io\\\\front\" -Recurse -Filter \".env*\")",
+      "Bash(Select-Object FullName)",
+      "Bash(New-Item *)",
+      "Skill(superpowers:test-driven-development)"
+    ]
+  }
+}

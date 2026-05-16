@@ -1,0 +1,65 @@
+{
+  "expo": {
+    "name": "WHERE·io",
+    "slug": "whereio-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0A1028",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#0A1028"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O WHERE·io precisa acessar suas fotos para adicionar imagens aos locais.",
+          "cameraPermission": "O WHERE·io precisa usar sua câmera para fotografar os locais."
+        }
+      ],
+      [
+        "expo-secure-store"
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "O WHERE·io usa sua localização para mostrar locais próximos e no mapa.",
+          "locationWhenInUsePermission": "O WHERE·io usa sua localização para mostrar locais próximos e no mapa."
+        }
+      ]
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.whereio.mobile",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "O WHERE·io usa sua localização para mostrar locais próximos e no mapa."
+      }
+    },
+    "android": {
+      "permissions": [
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "adaptiveIcon": {
+        "backgroundColor": "#0A1028"
+      },
+      "package": "com.whereio.mobile",
+      "usesCleartextTraffic": true
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "backgroundColor": "#0A1028"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "539ad63f-a053-4d03-abc5-9e9a1b5685f4"
+      }
+    }
+  }
+}

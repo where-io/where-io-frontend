@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, useFocusEffect, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Location from 'expo-location';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
 import { LeafletMap } from '../components/LeafletMap';
 import { useMapTheme } from '../context/MapThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -54,6 +54,7 @@ export function ScreenMap() {
 
   const slideAnim = useRef(new Animated.Value(0)).current;
   const [displayLocation, setDisplayLocation] = useState<Local | null>(null);
+  const [centerOnUserCount, setCenterOnUserCount] = useState(0);
   const handleMapPress = useCallback(() => setSelectedLocation(null), []);
 
   // ── User location ─────────────────────────────────────────
@@ -196,6 +197,7 @@ export function ScreenMap() {
           flyToCoords={flyToCoords}
           userLocation={userLocation}
           userInitials={userInitials}
+          centerOnUserTrigger={centerOnUserCount}
           onMapPress={handleMapPress}
         />
       )}
@@ -237,17 +239,20 @@ export function ScreenMap() {
             </Mono>
           </View>
 
-          {/* Add location */}
+          {/* Center on user */}
           <TouchableOpacity
-            onPress={() => (navigation as any).getParent()?.navigate('Create')}
+            onPress={userLocation ? () => setCenterOnUserCount(c => c + 1) : undefined}
+            activeOpacity={userLocation ? 0.7 : 1}
             style={{
               width: 32, height: 32, borderRadius: 10,
               backgroundColor: W.bg3, borderWidth: 1, borderColor: W.line,
               alignItems: 'center', justifyContent: 'center',
+              opacity: userLocation ? 1 : 0.3,
             }}
           >
-            <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={W.ink2} strokeWidth={2}>
-              <Path d="M12 5v14M5 12h14" />
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+              <Circle cx="12" cy="12" r="8" stroke={W.ink2} strokeWidth={1.5} />
+              <Circle cx="12" cy="12" r="2.5" fill={W.ink2} />
             </Svg>
           </TouchableOpacity>
         </GlassPanel>

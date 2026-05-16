@@ -20,6 +20,8 @@ interface Props {
   userLocation?: UserLocation | null;
   /** Iniciais do usuário exibidas dentro do marcador de avatar. */
   userInitials?: string;
+  /** Incrementar para acionar voo animado até a posição do usuário. */
+  centerOnUserTrigger?: number;
   onMapPress?: () => void;
 }
 
@@ -226,6 +228,7 @@ export function LeafletMap({
   flyToCoords,
   userLocation,
   userInitials = 'EU',
+  centerOnUserTrigger = 0,
   onMapPress,
 }: Props) {
   const webViewRef = useRef<WebView>(null);
@@ -309,6 +312,14 @@ export function LeafletMap({
     userLocationSentRef.current = true;
     injectUserLocation(userLocation, fly);
   }, [userLocation, injectUserLocation]);
+
+  // Center on user — triggered by button press in parent
+  useEffect(() => {
+    if (!centerOnUserTrigger || !loadedRef.current || !webViewRef.current) return;
+    const loc = userLocationRef.current;
+    if (!loc) return;
+    webViewRef.current.injectJavaScript(`flyToLocation(${loc.lat},${loc.lng}); true;`);
+  }, [centerOnUserTrigger]);
 
   /* ── WebView callbacks ── */
 
