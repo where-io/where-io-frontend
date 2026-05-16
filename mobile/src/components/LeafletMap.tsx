@@ -76,7 +76,7 @@ function buildHtml(apiUrl: string, initialTheme: MapThemeId): string {
 <script>
 var API_URL = '${apiUrl}';
 var MAP_TILE_THEMES = ${themesJson};
-var map = L.map('map', { zoomControl: true });
+var map = L.map('map', { zoomControl: false });
 var tileLayer = null;
 
 /* ── Map theme ── */
