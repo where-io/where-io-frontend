@@ -6,7 +6,9 @@
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#0A1028",
+    "icon": "./assets/icon.png",
     "splash": {
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#0A1028"
     },
@@ -46,6 +48,7 @@
         "android.permission.RECORD_AUDIO"
       ],
       "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0A1028"
       },
       "package": "com.whereio.mobile",
@@ -54,7 +57,8 @@
     "web": {
       "bundler": "metro",
       "output": "single",
-      "backgroundColor": "#0A1028"
+      "backgroundColor": "#0A1028",
+      "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
