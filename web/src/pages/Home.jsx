@@ -9,8 +9,8 @@ import FriendsSidebar from "../features/sidebar/FriendsSidebar.jsx";
 import SettingsModal from "../features/sidebar/SettingsModal.jsx";
 import CadastroLocal from "../features/cadastroLocal/CadastroLocal.jsx";
 import CadastroVisita from "../features/cadastroVisita/CadastroVisita.jsx";
-import {LocaisService} from "../../../packages/service/LocaisService";
-import {VisitaService} from "../../../packages/service/VisitaService";
+import {LocaisService} from "../service/LocaisService";
+import {VisitaService} from "../service/VisitaService";
 
 function formatEndereco(endereco) {
     if (!endereco || typeof endereco !== "object") return "—";

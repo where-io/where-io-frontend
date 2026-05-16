@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { API_BASE_URL } from "../../../../packages/service/apiClient";
-import { LocaisService } from "../../../../packages/service/LocaisService";
+import { API_BASE_URL } from "../../service/apiClient";
+import { LocaisService } from "../../service/LocaisService";
 
 /** Altura máxima da pré-visualização (viewport); imagem inteira com `object-fit: contain`. */
 const MEDIA_STRIP_HEIGHT = "27vh";

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LocaisService } from "../../../../packages/service/LocaisService";
-import { TagService } from "../../../../packages/service/TagService";
+import { LocaisService } from "../../service/LocaisService";
+import { TagService } from "../../service/TagService";
 import { useMapActions } from "../mapa/MapContext.jsx";
 
 function resolveTagColor(cor) {

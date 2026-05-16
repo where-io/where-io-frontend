@@ -1,5 +1,5 @@
-// export const API_URL = 'http://192.168.15.7:8080';
-export const API_URL = 'https://where-io-backend-production.up.railway.app';
+export const API_URL = 'http://192.168.15.7:8080';
+// export const API_URL = 'https://where-io-backend-production.up.railway.app';
 // export const API_URL = 'http://localhost:8080';
 
 /**

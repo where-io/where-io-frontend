@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { API_BASE_URL } from "../../../../packages/service/apiClient";
-import { LocaisService } from "../../../../packages/service/LocaisService";
-import { TagService } from "../../../../packages/service/TagService";
+import { API_BASE_URL } from "../../service/apiClient";
+import { LocaisService } from "../../service/LocaisService";
+import { TagService } from "../../service/TagService";
 import LocationInfoCard from "../grid/LocationInfoCard";
 import LocalPhotosCarousel from "../grid/LocalPhotosCarousel";
 import LightRedInfoCard from "../grid/LightRedInfoCard";

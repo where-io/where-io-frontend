@@ -35,6 +35,7 @@ export interface Local {
   visibilidade?: string;
   tags: Tag[];
   idTags?: string[];
+  visitas?: { id: string }[];
 }
 
 /** Alinhado ao `LocalDtoRequest` / payload web: tags novas sem id. */

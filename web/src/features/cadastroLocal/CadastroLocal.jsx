@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useMapActions } from "../mapa/MapContext.jsx";
 import FormSign from "../../components/navlink/Form/FormSign.jsx";
 import FormField from "../../components/navlink/Form/FormField.jsx";
-import { LocaisService } from "../../../../packages/service/LocaisService";
-import { TagService } from "../../../../packages/service/TagService";
+import { LocaisService } from "../../service/LocaisService";
+import { TagService } from "../../service/TagService";
 import { usePopup } from "../../context/PopupContext.jsx";
 
 function useGooglePlaces() {

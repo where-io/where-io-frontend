@@ -1,7 +1,7 @@
 import { useState } from "react";
 import FormSign from "../../components/navlink/Form/FormSign.jsx";
 import FormField from "../../components/navlink/Form/FormField.jsx";
-import { VisitaService } from "../../../../packages/service/VisitaService";
+import { VisitaService } from "../../service/VisitaService";
 
 const inputStyle = {
   width: '100%', background: 'var(--bg-4)', border: '1px solid transparent',

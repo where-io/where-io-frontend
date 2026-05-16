@@ -10,16 +10,16 @@ import {
 import {
   getAccessTokenSnapshot,
   subscribeAccessToken,
-} from "../../../packages/service/authAccessStore";
-import { applyAuthTokens, clearAuthTokens } from "../../../packages/service/authTokens";
+} from "../service/authAccessStore";
+import { applyAuthTokens, clearAuthTokens } from "../service/authTokens";
 import {
   formatAuthError,
   loginRequest,
   registerRequest,
-} from "../../../packages/service/authService";
-import { redirectToLogin } from "../../../packages/service/authRedirect.js";
-import { performTokenRefresh } from "../../../packages/service/refreshCoordinator.js";
-import { readRefreshToken } from "../../../packages/service/refreshTokenCookie";
+} from "../service/authService";
+import { redirectToLogin } from "../service/authRedirect.js";
+import { performTokenRefresh } from "../service/refreshCoordinator.js";
+import { readRefreshToken } from "../service/refreshTokenCookie";
 
 const AuthContext = createContext(null);
 

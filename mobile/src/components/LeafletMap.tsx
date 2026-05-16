@@ -102,11 +102,19 @@ function normalizeColor(c) {
   return c.startsWith('#') ? c : '#' + c;
 }
 
-function pinSvg(color) {
+function pinSvg(color, visited) {
+  if (visited) {
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="26" height="34" viewBox="0 0 32 42" fill="none">'
+      + '<path d="M16 41s13-13.5 13-25A13 13 0 1 0 3 16c0 11.5 13 25 13 25z"'
+      + ' fill="' + color + '" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>'
+      + '<path d="M11 15.5l3.5 3.5L21 12.5" stroke="#0A1028" stroke-width="2.6"'
+      + ' stroke-linecap="round" stroke-linejoin="round" fill="none"/>'
+      + '</svg>';
+  }
   return '<svg xmlns="http://www.w3.org/2000/svg" width="26" height="34" viewBox="0 0 32 42" fill="none">'
     + '<path d="M16 41s13-13.5 13-25A13 13 0 1 0 3 16c0 11.5 13 25 13 25z"'
-    + ' fill="' + color + '" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>'
-    + '<circle cx="16" cy="16" r="4.5" fill="white"/>'
+    + ' fill="rgba(10,16,40,0.65)" stroke="' + color + '" stroke-width="1.6" stroke-dasharray="3 2.5"/>'
+    + '<circle cx="16" cy="16" r="2.5" fill="' + color + '" fill-opacity="0.55"/>'
     + '</svg>';
 }
 
@@ -121,9 +129,10 @@ function updateLocations(locs) {
 
     var color = '#FF6B5E';
     if (loc.tags && loc.tags.length === 1) color = normalizeColor(loc.tags[0].cor);
+    var visited = !!(loc.visitas && loc.visitas.length > 0);
 
     var icon = L.divIcon({
-      html: pinSvg(color),
+      html: pinSvg(color, visited),
       iconSize: [26, 34],
       iconAnchor: [13, 34],
       className: '',

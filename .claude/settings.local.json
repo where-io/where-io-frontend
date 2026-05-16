@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(superpowers:systematic-debugging)",
+      "Bash(npm start *)",
+      "Skill(superpowers:brainstorming)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Skill(superpowers:writing-plans)",
+      "Skill(superpowers:executing-plans)",
+      "Bash(node -e \"require\\('@resvg/resvg-js'\\)\")",
+      "Bash(node -e \"require\\('sharp'\\)\")",
+      "Bash(node -e \"require\\('canvas'\\)\")",
+      "Bash(node -e \"require\\('jimp'\\)\")",
+      "Bash(node -e \"require\\('jimp-compact'\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(python -c \"import PIL; print\\('PIL ok'\\)\")",
+      "Bash(python -c \"import cairosvg; print\\('cairo ok'\\)\")",
+      "Bash(python -c \"import pip; print\\([p.project_name for p in pip.get_installed_distributions\\(\\)]\\)\")",
+      "Bash(pip list *)",
+      "Bash(python scripts/generate-icon.py)"
+    ]
+  }
+}

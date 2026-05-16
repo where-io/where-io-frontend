@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../context/AuthContext.jsx";
-import { AmigosService } from "../../../../packages/service/AmigosService.js";
+import { AmigosService } from "../../service/AmigosService.js";
 import {
   decodeJwtPayload,
   displayNameFromJwtClaims,
   initialsFromUser,
-} from "../../../../packages/service/jwtDecode.js";
+} from "../../service/jwtDecode.js";
 
 function FriendRow({ friend }) {
   const name = friend.nome || friend.name || "Sem nome";
