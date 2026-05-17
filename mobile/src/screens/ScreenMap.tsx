@@ -11,6 +11,7 @@ import Svg, { Circle, Path } from 'react-native-svg';
 import { LeafletMap } from '../components/LeafletMap';
 import { useMapTheme } from '../context/MapThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useLocationSharing } from '../context/LocationSharingContext';
 import { GlassPanel } from '../components/GlassPanel';
 import { Mono } from '../components/Typography';
 import { W, fonts } from '../tokens';
@@ -38,6 +39,14 @@ function pinColorForLocal(loc: Local): string {
 export function ScreenMap() {
   const { mapTheme } = useMapTheme();
   const { user } = useAuth();
+  const { activeFriendIds, sendLocation, friendLocations } = useLocationSharing();
+
+  // Refs so GPS watch closure sees latest values without restarting the watch
+  const activeFriendIdsRef = useRef<string[]>(activeFriendIds);
+  activeFriendIdsRef.current = activeFriendIds;
+  const sendLocationRef = useRef(sendLocation);
+  sendLocationRef.current = sendLocation;
+
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<RootParamList>>();
   const route = useRoute<MapTabRouteProp>();
@@ -101,6 +110,14 @@ export function ScreenMap() {
             lat: loc.coords.latitude,
             lng: loc.coords.longitude,
           });
+          if (activeFriendIdsRef.current.length > 0) {
+            sendLocationRef.current({
+              latitude: loc.coords.latitude,
+              longitude: loc.coords.longitude,
+              movement: 'WALKING',
+              targetFriendIds: activeFriendIdsRef.current,
+            });
+          }
         },
       );
     })();
@@ -199,6 +216,7 @@ export function ScreenMap() {
           userInitials={userInitials}
           centerOnUserTrigger={centerOnUserCount}
           onMapPress={handleMapPress}
+          friendLocations={friendLocations}
         />
       )}
 
