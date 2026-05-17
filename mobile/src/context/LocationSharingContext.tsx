@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FriendLocation, LocationPayload } from '../models/FriendLocation';
 import { wsService } from '../service/WebSocketService';
 import { getAccessToken } from '../service/authTokenStore';
+import { useAuth } from './AuthContext';
 
 const TOGGLES_KEY = '@whereio/location_toggles';
 
@@ -18,6 +19,7 @@ interface LocationSharingContextValue {
 const LocationSharingContext = createContext<LocationSharingContextValue | null>(null);
 
 export function LocationSharingProvider({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, authReady } = useAuth();
   const [toggles, setToggles] = useState<Record<string, boolean>>({});
   const [friendLocations, setFriendLocations] = useState<Record<string, FriendLocation>>({});
   const [isConnected, setIsConnected] = useState(false);
@@ -31,12 +33,18 @@ export function LocationSharingProvider({ children }: { children: React.ReactNod
     });
   }, []);
 
-  // Connect WebSocket once on mount
+  // Connect WebSocket only after auth is ready and user is authenticated
   useEffect(() => {
-    const token = getAccessToken();
-    if (!token) return;
+    if (!authReady || !isAuthenticated) {
+      if (!isAuthenticated && authReady) {
+        wsService.disconnect();
+        setIsConnected(false);
+      }
+      return;
+    }
 
-    wsService.connect(token, (location: FriendLocation) => {
+    wsService.connect(getAccessToken, (location: FriendLocation) => {
+      console.log('[WS] Localização recebida:', location);
       setFriendLocations((prev) => ({ ...prev, [location.userId]: location }));
       setIsConnected(true);
     });
@@ -47,7 +55,7 @@ export function LocationSharingProvider({ children }: { children: React.ReactNod
       wsService.disconnect();
       setIsConnected(false);
     };
-  }, []);
+  }, [authReady, isAuthenticated]);
 
   const setToggle = useCallback((friendId: string, active: boolean) => {
     setToggles((prev) => {
