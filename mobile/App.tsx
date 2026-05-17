@@ -25,6 +25,7 @@ import {
 
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { MapThemeProvider } from './src/context/MapThemeContext';
+import { LocationSharingProvider } from './src/context/LocationSharingContext';
 import { ScreenMap } from './src/screens/ScreenMap';
 import { ScreenCollection } from './src/screens/ScreenCollection';
 import { ScreenCreate } from './src/screens/ScreenCreate';
@@ -163,7 +164,9 @@ export default function App() {
       <StatusBar style="light" backgroundColor={W.bg0} />
       <AuthProvider>
         <MapThemeProvider>
-          <RootContent />
+          <LocationSharingProvider>
+            <RootContent />
+          </LocationSharingProvider>
         </MapThemeProvider>
       </AuthProvider>
     </SafeAreaProvider>
