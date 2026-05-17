@@ -7,6 +7,7 @@ import React, {
   useState,
 } from 'react';
 import { Platform } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
 
 export type MapThemeId = 'satellite' | 'terrain' | 'dark';
 
@@ -43,18 +44,37 @@ export const MAP_TILE_THEMES: Record<
 };
 
 const STORAGE_KEY = 'whereio_map_theme';
+const DEFAULT_THEME: MapThemeId = 'satellite';
 
-function readStoredTheme(): MapThemeId {
-  if (Platform.OS !== 'web' || typeof localStorage === 'undefined') {
-    return 'satellite';
-  }
+function isMapThemeId(value: string | null | undefined): value is MapThemeId {
+  return !!value && MAP_THEME_ORDER.includes(value as MapThemeId);
+}
+
+async function loadStoredTheme(): Promise<MapThemeId> {
   try {
-    const v = localStorage.getItem(STORAGE_KEY);
-    if (v && MAP_THEME_ORDER.includes(v as MapThemeId)) return v as MapThemeId;
+    if (Platform.OS === 'web' && typeof localStorage !== 'undefined') {
+      const v = localStorage.getItem(STORAGE_KEY);
+      if (isMapThemeId(v)) return v;
+    } else if (Platform.OS !== 'web') {
+      const v = await SecureStore.getItemAsync(STORAGE_KEY);
+      if (isMapThemeId(v)) return v;
+    }
   } catch {
     /* ignore */
   }
-  return 'satellite';
+  return DEFAULT_THEME;
+}
+
+async function persistTheme(theme: MapThemeId): Promise<void> {
+  try {
+    if (Platform.OS === 'web' && typeof localStorage !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, theme);
+    } else if (Platform.OS !== 'web') {
+      await SecureStore.setItemAsync(STORAGE_KEY, theme);
+    }
+  } catch {
+    /* ignore */
+  }
 }
 
 type MapThemeContextValue = {
@@ -65,29 +85,23 @@ type MapThemeContextValue = {
 const MapThemeContext = createContext<MapThemeContextValue | null>(null);
 
 export function MapThemeProvider({ children }: { children: React.ReactNode }) {
-  const [mapTheme, setMapThemeState] = useState<MapThemeId>(readStoredTheme);
+  const [mapTheme, setMapThemeState] = useState<MapThemeId>(DEFAULT_THEME);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadStoredTheme().then(theme => {
+      if (!cancelled) setMapThemeState(theme);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const setMapTheme = useCallback((theme: MapThemeId) => {
     if (!MAP_THEME_ORDER.includes(theme)) return;
     setMapThemeState(theme);
-    if (Platform.OS === 'web' && typeof localStorage !== 'undefined') {
-      try {
-        localStorage.setItem(STORAGE_KEY, theme);
-      } catch {
-        /* ignore */
-      }
-    }
+    void persistTheme(theme);
   }, []);
-
-  useEffect(() => {
-    if (Platform.OS === 'web' && typeof localStorage !== 'undefined') {
-      try {
-        localStorage.setItem(STORAGE_KEY, mapTheme);
-      } catch {
-        /* ignore */
-      }
-    }
-  }, [mapTheme]);
 
   const value = useMemo(
     () => ({ mapTheme, setMapTheme }),
