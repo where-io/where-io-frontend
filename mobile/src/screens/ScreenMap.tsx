@@ -176,7 +176,7 @@ export function ScreenMap() {
     : null;
 
   const headerTop = insets.top + 8;
-  const pinColor = displayLocation ? pinColor : W.coral;
+  const pinColor = displayLocation ? pinColorForLocal(displayLocation) : W.coral;
 
   // ── Render ────────────────────────────────────────────────
   return (

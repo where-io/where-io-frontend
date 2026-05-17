@@ -14,6 +14,7 @@ import { Mono, Display } from '../components/Typography';
 import { GlassPanel } from '../components/GlassPanel';
 import { LocalPhotosCarousel } from '../components/LocalPhotosCarousel';
 import { LocationAddressCard } from '../components/LocationAddressCard';
+import { LocalTagsManager } from '../components/LocalTagsManager';
 import { W, fonts } from '../tokens';
 import { Local, update as updateLocal } from '../service/LocaisService';
 import { getByLocalId, remove as removeVisita, Visita } from '../service/VisitaService';
@@ -47,6 +48,7 @@ export function ScreenDetail() {
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
   const [nameSaveBusy, setNameSaveBusy] = useState(false);
+  const [tagCount, setTagCount] = useState(location?.tags?.length ?? 0);
 
   const loadVisitas = useCallback(() => {
     if (!location?.id) return;
@@ -312,7 +314,7 @@ export function ScreenDetail() {
             {[
               { k: 'Visitas', v: String(visitas.length) },
               { k: 'Avaliação', v: avgRating },
-              { k: 'Tags', v: String(location.tags?.length ?? 0) },
+              { k: 'Tags', v: String(tagCount) },
             ].map((s, i) => (
               <View key={i} style={{ flex: 1, backgroundColor: W.bg2, borderWidth: 1, borderColor: W.lineSoft, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10 }}>
                 <Mono size={9}>{s.k}</Mono>
@@ -329,6 +331,7 @@ export function ScreenDetail() {
             </View>
           )}
 
+          <LocalTagsManager localId={location.id} onTagsChange={tags => setTagCount(tags.length)} />
           <LocationAddressCard endereco={location.endereco} />
           <LocalPhotosCarousel localId={location.id} />
 

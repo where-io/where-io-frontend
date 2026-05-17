@@ -146,6 +146,15 @@ export function ScreenCreate() {
     lng: number;
   } | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    if (!tagDraftOpen) return;
+    const t = setTimeout(() => {
+      scrollRef.current?.scrollToEnd({ animated: true });
+    }, 80);
+    return () => clearTimeout(t);
+  }, [tagDraftOpen]);
 
   useEffect(() => {
     let cancel = false;
@@ -324,6 +333,10 @@ export function ScreenCreate() {
   };
 
   const tagDraftUiColor = resolveTagHex(tagColorDraft);
+  const submitBarBottom = Math.max(insets.bottom + 10, 28);
+  /** Desloca o CTA fixo para baixo quando o painel de nova tag está aberto. */
+  const tagDraftSubmitShift = tagDraftOpen ? 72 : 0;
+  const scrollBottomPad = 120 + (tagDraftOpen ? 200 : 0);
 
   return (
     <View style={{ flex: 1, backgroundColor: W.bg0, paddingTop: insets.top }}>
@@ -377,12 +390,13 @@ export function ScreenCreate() {
       </View>
 
       <ScrollView
+        ref={scrollRef}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="always"
         keyboardDismissMode="on-drag"
         style={Platform.OS === 'web' ? { overflow: 'visible' } : undefined}
         contentContainerStyle={[
-          { paddingBottom: 120, paddingHorizontal: 16 },
+          { paddingBottom: scrollBottomPad, paddingHorizontal: 16 },
           Platform.OS === 'web' && { overflow: 'visible' as const },
         ]}
       >
@@ -691,17 +705,17 @@ export function ScreenCreate() {
             {tagDraftOpen ? (
               <View
                 style={{
-                  marginTop: 2,
+                  marginTop: 4,
                   backgroundColor: 'rgba(255,255,255,0.02)',
                   borderWidth: 1,
                   borderColor: W.lineSoft,
                   borderRadius: 12,
-                  padding: 12,
-                  gap: 10,
+                  padding: 14,
+                  gap: 12,
                 }}
               >
                 <TextInput
-                  style={[fieldStyle, { paddingVertical: 10, fontSize: 12, color: W.ink }]}
+                  style={[fieldStyle, { paddingVertical: 12, fontSize: 14, color: W.ink }]}
                   value={tagNameDraft}
                   onChangeText={setTagNameDraft}
                   placeholder="Nome da categoria..."
@@ -709,21 +723,21 @@ export function ScreenCreate() {
                   onSubmitEditing={addTagFromDraft}
                   returnKeyType="done"
                 />
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, flex: 1, alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, flex: 1, alignItems: 'center' }}>
                     {TAG_PALETTE.map(p => {
                       const active = tagColorDraft.toLowerCase() === p.value.toLowerCase();
                       return (
                         <TouchableOpacity
                           key={p.value}
                           onPress={() => setTagColorDraft(p.value)}
-                          hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+                          hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
                           style={{
-                            width: 18,
-                            height: 18,
+                            width: 24,
+                            height: 24,
                             borderRadius: 99,
                             backgroundColor: p.value,
-                            borderWidth: active ? 2 : 1,
+                            borderWidth: active ? 2.5 : 1,
                             borderColor: active ? hexToRgba(p.value, 0.75) : 'rgba(255,255,255,0.12)',
                           }}
                           accessibilityLabel={p.name}
@@ -735,15 +749,17 @@ export function ScreenCreate() {
                     onPress={addTagFromDraft}
                     activeOpacity={0.85}
                     style={{
-                      paddingVertical: 8,
-                      paddingHorizontal: 12,
+                      paddingVertical: 10,
+                      paddingHorizontal: 16,
                       borderRadius: 999,
                       borderWidth: 1,
                       borderColor: hexToRgba(tagDraftUiColor, 0.28),
                       backgroundColor: hexToRgba(tagDraftUiColor, 0.14),
+                      minHeight: 44,
+                      justifyContent: 'center',
                     }}
                   >
-                    <Text style={{ fontSize: 12, fontFamily: fonts.bodySemiBold, color: tagDraftUiColor }}>Adicionar</Text>
+                    <Text style={{ fontSize: 14, fontFamily: fonts.bodySemiBold, color: tagDraftUiColor }}>Adicionar</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -752,7 +768,15 @@ export function ScreenCreate() {
         </View>
       </ScrollView>
 
-      <View style={{ position: 'absolute', bottom: Math.max(insets.bottom + 10, 28), left: 16, right: 16 }}>
+      <View
+        style={{
+          position: 'absolute',
+          bottom: submitBarBottom,
+          left: 16,
+          right: 16,
+          transform: [{ translateY: tagDraftSubmitShift }],
+        }}
+      >
         <TouchableOpacity onPress={handleSubmit} disabled={submitting} activeOpacity={0.85}>
           <LinearGradient
             colors={[W.coralSoft, W.coral]}
