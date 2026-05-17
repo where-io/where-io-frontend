@@ -1,10 +1,9 @@
 import { apiFetch } from "./apiClient";
 
 export class LocaisService {
-  static getAll() {
-    return apiFetch("/api/local/all", {
-      method: "GET",
-    });
+  static getAll(page = 0, size = 200) {
+    const qs = new URLSearchParams({ page, size });
+    return apiFetch(`/api/local/all?${qs}`, { method: "GET" });
   }
 
   static async create(payload) {

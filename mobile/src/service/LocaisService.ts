@@ -60,8 +60,8 @@ export interface FotoResponse {
   urlPath: string;
 }
 
-export async function getAll(): Promise<Local[]> {
-  const res = await apiFetch('/api/local/all');
+export async function getAll(page = 0, size = 200): Promise<Local[]> {
+  const res = await apiFetch(`/api/local/all?page=${page}&size=${size}`);
   if (!res.ok) return [];
   return res.json();
 }
