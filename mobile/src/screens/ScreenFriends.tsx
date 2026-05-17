@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator,
-  Alert, Modal, Pressable, StyleSheet,
+  Alert, Modal, Pressable, StyleSheet, Switch,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -14,6 +14,7 @@ import {
   enviarConvite, aceitarConvite, cancelarOuRecusarConvite, removerAmigo,
   Amigo, Convite,
 } from '../service/AmigosService';
+import { useLocationSharing } from '../context/LocationSharingContext';
 
 type TabId = 'amigos' | 'recebidos' | 'enviados';
 
@@ -110,6 +111,7 @@ export function ScreenFriends() {
   const [sendingConvite, setSendingConvite] = useState(false);
   const [toRemove, setToRemove] = useState<Amigo | null>(null);
   const [removeBusy, setRemoveBusy] = useState(false);
+  const { toggles, setToggle } = useLocationSharing();
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -299,6 +301,14 @@ export function ScreenFriends() {
               <View style={{ paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, backgroundColor: f.online ? 'rgba(94,224,200,0.12)' : W.bg3, borderWidth: 1, borderColor: f.online ? 'rgba(94,224,200,0.3)' : W.line }}>
                 <Mono size={9} color={f.online ? W.aqua : W.ink4}>{f.online ? 'online' : 'offline'}</Mono>
               </View>
+              <Switch
+                value={!!toggles[f.id]}
+                onValueChange={(val) => setToggle(f.id, val)}
+                trackColor={{ false: W.bg3, true: 'rgba(94,224,200,0.4)' }}
+                thumbColor={toggles[f.id] ? W.aqua : W.ink4}
+                ios_backgroundColor={W.bg3}
+                style={{ transform: [{ scaleX: 0.85 }, { scaleY: 0.85 }] }}
+              />
               <TouchableOpacity
                 onPress={() => setToRemove(f)}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
