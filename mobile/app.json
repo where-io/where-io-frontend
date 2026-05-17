@@ -63,7 +63,8 @@
     "extra": {
       "eas": {
         "projectId": "539ad63f-a053-4d03-abc5-9e9a1b5685f4"
-      }
+      },
+      "websocketUrl": "ws://localhost:8081/ws"
     }
   }
 }
