@@ -4,6 +4,7 @@ import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import { Local } from '../service/LocaisService';
 import { API_URL } from '../service/config';
 import { MapThemeId, MAP_TILE_THEMES } from '../context/MapThemeContext';
+import { FriendLocation } from '../models/FriendLocation';
 
 interface UserLocation {
   lat: number;
@@ -23,6 +24,8 @@ interface Props {
   /** Incrementar para acionar voo animado até a posição do usuário. */
   centerOnUserTrigger?: number;
   onMapPress?: () => void;
+  /** Real-time locations of friends to display as animated markers. */
+  friendLocations?: Record<string, FriendLocation>;
 }
 
 function buildHtml(apiUrl: string, initialTheme: MapThemeId): string {
@@ -69,6 +72,22 @@ function buildHtml(apiUrl: string, initialTheme: MapThemeId): string {
     border:1.5px solid rgba(140,123,255,0.4);
     animation:userPulse 2.2s ease-out 0.55s infinite;
     pointer-events:none;
+  }
+  /* ── Friend markers ── */
+  .friend-marker {
+    width:36px;height:36px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    border:2px solid rgba(255,255,255,0.6);
+    box-shadow:0 3px 10px rgba(0,0,0,0.5);
+    color:white;font-size:12px;font-weight:700;
+    font-family:sans-serif;position:relative;
+    transition:opacity 0.4s;
+  }
+  .friend-marker.offline { opacity:0.4; }
+  .friend-marker-dot {
+    position:absolute;bottom:-2px;right:-2px;
+    width:10px;height:10px;border-radius:50%;
+    border:2px solid #0A1028;
   }
 </style>
 </head>
@@ -209,6 +228,88 @@ map.on('click', function() {
   }
 });
 
+/* ── Friend markers ── */
+var friendMarkers = {};
+
+var FRIEND_GRADIENTS = [
+  ['#8C7BFF','#FF6B9D'],
+  ['#5EE0C8','#5EB7FF'],
+  ['#F2B95C','#FF6B5E'],
+  ['#FF6B9D','#FF6B5E'],
+  ['#6E7699','#4A5176']
+];
+
+function friendGradient(userId) {
+  var hash = 0;
+  for (var i = 0; i < userId.length; i++) hash = (hash * 31 + userId.charCodeAt(i)) | 0;
+  var idx = Math.abs(hash) % FRIEND_GRADIENTS.length;
+  return FRIEND_GRADIENTS[idx];
+}
+
+function buildFriendMarkerHtml(initials, userId, offline) {
+  var g = friendGradient(userId);
+  var dotColor = offline ? '#4A5176' : '#5EE0C8';
+  return '<div class="friend-marker' + (offline ? ' offline' : '') + '" '
+    + 'style="background:linear-gradient(135deg,' + g[0] + ',' + g[1] + ');">'
+    + '<span style="position:relative;z-index:1;user-select:none;">' + initials + '</span>'
+    + '<div class="friend-marker-dot" style="background:' + dotColor + ';"></div>'
+    + '</div>';
+}
+
+function animateFriendMarker(friendId, toLat, toLng) {
+  var entry = friendMarkers[friendId];
+  if (!entry) return;
+  var marker = entry.marker;
+  var from = marker.getLatLng();
+  var start = performance.now();
+  var duration = 800;
+  if (entry.animFrame) cancelAnimationFrame(entry.animFrame);
+
+  function step(now) {
+    var t = Math.min((now - start) / duration, 1);
+    var ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+    marker.setLatLng([
+      from.lat + (toLat - from.lat) * ease,
+      from.lng + (toLng - from.lng) * ease
+    ]);
+    if (t < 1) { entry.animFrame = requestAnimationFrame(step); }
+    else { entry.animFrame = null; }
+  }
+  entry.animFrame = requestAnimationFrame(step);
+}
+
+function updateFriendLocations(locations) {
+  locations.forEach(function(loc) {
+    var initials = loc.initials || '??';
+    var offline = loc.presence === 'OFFLINE';
+
+    if (!friendMarkers[loc.userId]) {
+      if (offline || loc.latitude == null) return;
+      var icon = L.divIcon({
+        html: buildFriendMarkerHtml(initials, loc.userId, false),
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
+        className: ''
+      });
+      var marker = L.marker([loc.latitude, loc.longitude], { icon: icon, zIndexOffset: 100 }).addTo(map);
+      friendMarkers[loc.userId] = { marker: marker, animFrame: null };
+    } else {
+      var entry = friendMarkers[loc.userId];
+      if (offline) {
+        var icon = L.divIcon({
+          html: buildFriendMarkerHtml(initials, loc.userId, true),
+          iconSize: [36, 36],
+          iconAnchor: [18, 18],
+          className: ''
+        });
+        entry.marker.setIcon(icon);
+      } else if (loc.latitude != null && loc.longitude != null) {
+        animateFriendMarker(loc.userId, loc.latitude, loc.longitude);
+      }
+    }
+  });
+}
+
 /* ── Message handler ── */
 function handleMessage(data) {
   try {
@@ -219,6 +320,7 @@ function handleMessage(data) {
     if (msg.type === 'setUserLocation') {
       updateUserLocation(msg.lat, msg.lng, msg.initials, msg.flyTo);
     }
+    if (msg.type === 'updateFriendLocations') updateFriendLocations(msg.locations);
   } catch(e) {}
 }
 
@@ -239,6 +341,7 @@ export function LeafletMap({
   userInitials = 'EU',
   centerOnUserTrigger = 0,
   onMapPress,
+  friendLocations = {},
 }: Props) {
   const webViewRef = useRef<WebView>(null);
   const loadedRef = useRef(false);
@@ -262,6 +365,9 @@ export function LeafletMap({
   const userInitialsRef = useRef(userInitials);
   userLocationRef.current = userLocation ?? null;
   userInitialsRef.current = userInitials;
+
+  const friendLocationsRef = useRef(friendLocations);
+  friendLocationsRef.current = friendLocations;
 
   // Track whether we've already sent the first user location (= fly to it once)
   const userLocationSentRef = useRef(false);
@@ -330,6 +436,21 @@ export function LeafletMap({
     webViewRef.current.injectJavaScript(`flyToLocation(${loc.lat},${loc.lng}); true;`);
   }, [centerOnUserTrigger]);
 
+  // Friend locations — animated markers
+  useEffect(() => {
+    if (!loadedRef.current || !webViewRef.current) return;
+    const locs = Object.values(friendLocations).map((fl) => ({
+      userId: fl.userId,
+      latitude: fl.latitude,
+      longitude: fl.longitude,
+      presence: fl.presence,
+      initials: fl.userId.slice(0, 2).toUpperCase(),
+    }));
+    webViewRef.current.injectJavaScript(
+      `updateFriendLocations(${JSON.stringify(locs)}); true;`
+    );
+  }, [friendLocations]);
+
   /* ── WebView callbacks ── */
 
   const handleLoad = useCallback(() => {
@@ -355,6 +476,21 @@ export function LeafletMap({
     if (ul && !userLocationSentRef.current) {
       userLocationSentRef.current = true;
       injectUserLocation(ul, true);
+    }
+
+    // Flush friend locations received before map loaded
+    const fls = Object.values(friendLocationsRef.current);
+    if (fls.length > 0) {
+      const locs = fls.map((fl) => ({
+        userId: fl.userId,
+        latitude: fl.latitude,
+        longitude: fl.longitude,
+        presence: fl.presence,
+        initials: fl.userId.slice(0, 2).toUpperCase(),
+      }));
+      webViewRef.current?.injectJavaScript(
+        `updateFriendLocations(${JSON.stringify(locs)}); true;`
+      );
     }
   }, [sendLocations, injectUserLocation]);
 
