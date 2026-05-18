@@ -4,13 +4,13 @@ import { setAccessToken, triggerTokenRefreshed } from './authTokenStore';
 
 let _pending: Promise<boolean> | null = null;
 
-export async function performTokenRefresh(): Promise<boolean> {
+export async function performTokenRefresh(notify = true): Promise<boolean> {
   if (_pending) return _pending;
-  _pending = _doRefresh().finally(() => { _pending = null; });
+  _pending = _doRefresh(notify).finally(() => { _pending = null; });
   return _pending;
 }
 
-async function _doRefresh(): Promise<boolean> {
+async function _doRefresh(notify: boolean): Promise<boolean> {
   const token = await getRefreshToken();
   if (!token) return false;
 
@@ -18,7 +18,7 @@ async function _doRefresh(): Promise<boolean> {
   if (result.ok && result.data?.accessToken && result.data?.refreshToken) {
     setAccessToken(result.data.accessToken);
     await saveRefreshToken(result.data.refreshToken);
-    triggerTokenRefreshed();
+    if (notify) triggerTokenRefreshed();
     return true;
   }
 

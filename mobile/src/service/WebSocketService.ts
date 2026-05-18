@@ -1,9 +1,19 @@
 import { Client } from '@stomp/stompjs';
 import { FriendLocation, LocationPayload } from '../models/FriendLocation';
 import { WEBSOCKET_URL } from './config';
+import { performTokenRefresh } from './refreshCoordinator';
 
 type LocationCallback = (location: FriendLocation) => void;
 type TokenProvider = () => string | null;
+
+function isTokenExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return Date.now() >= payload.exp * 1000;
+  } catch {
+    return true;
+  }
+}
 
 class WebSocketService {
   private client: Client | null = null;
@@ -16,13 +26,22 @@ class WebSocketService {
       brokerURL: WEBSOCKET_URL,
       reconnectDelay: this.reconnectDelay,
 
-      // Called before every connection attempt (including reconnects)
-      // Ensures the latest token is always used, even after expiry
-      beforeConnect: () => {
-        const token = getToken();
+      // Called before every connection attempt (including reconnects).
+      // Refreshes an expired token silently before attempting the handshake.
+      beforeConnect: async () => {
+        let token = getToken();
         if (!token) {
           this.client?.deactivate();
           return;
+        }
+        if (isTokenExpired(token)) {
+          // notify=false: skip triggerTokenRefreshed to avoid circular reconnect call
+          const ok = await performTokenRefresh(false);
+          token = getToken();
+          if (!ok || !token) {
+            this.client?.deactivate();
+            return;
+          }
         }
         this.client!.brokerURL = `${WEBSOCKET_URL}?token=${encodeURIComponent(token)}`;
         this.client!.connectHeaders = { token };
