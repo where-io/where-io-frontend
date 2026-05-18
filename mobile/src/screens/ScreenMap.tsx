@@ -39,11 +39,9 @@ function pinColorForLocal(loc: Local): string {
 export function ScreenMap() {
   const { mapTheme } = useMapTheme();
   const { user } = useAuth();
-  const { activeFriendIds, sendLocation, friendLocations } = useLocationSharing();
+  const { sendLocation, friendLocations } = useLocationSharing();
 
-  // Refs so GPS watch closure sees latest values without restarting the watch
-  const activeFriendIdsRef = useRef<string[]>(activeFriendIds);
-  activeFriendIdsRef.current = activeFriendIds;
+  // Ref so GPS watch closure sees latest sendLocation without restarting the watch
   const sendLocationRef = useRef(sendLocation);
   sendLocationRef.current = sendLocation;
 
@@ -110,14 +108,13 @@ export function ScreenMap() {
             lat: loc.coords.latitude,
             lng: loc.coords.longitude,
           });
-          if (activeFriendIdsRef.current.length > 0) {
-            sendLocationRef.current({
-              latitude: loc.coords.latitude,
-              longitude: loc.coords.longitude,
-              movement: 'WALKING',
-              targetFriendIds: activeFriendIdsRef.current,
-            });
-          }
+          // Send to all friends — targetFriendIds empty means "broadcast to everyone"
+          sendLocationRef.current({
+            latitude: loc.coords.latitude,
+            longitude: loc.coords.longitude,
+            movement: 'WALKING',
+            targetFriendIds: [],
+          });
         },
       );
     })();
