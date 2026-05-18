@@ -1,3 +1,4 @@
+import 'text-encoding'; // polyfill TextDecoder/TextEncoder for @stomp/stompjs on React Native
 import React, { useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
