@@ -30,6 +30,11 @@ class WebSocketService {
     this.client = new Client({
       brokerURL: WEBSOCKET_URL,
       reconnectDelay: this.reconnectDelay,
+      // Spring SimpleBroker responds with heart-beat:0,0 (won't send heartbeats).
+      // Setting both to 0 prevents @stomp/stompjs from timing out waiting for
+      // server heartbeats that will never arrive (~20s disconnects).
+      heartbeatIncoming: 0,
+      heartbeatOutgoing: 0,
 
       // Called before every connection attempt (including reconnects).
       // Refreshes an expired token silently before attempting the handshake.
