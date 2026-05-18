@@ -79,7 +79,7 @@ export function ScreenMap() {
     let active = true;
 
     (async () => {
-      const { granted } = await Location.getForegroundPermissionsAsync();
+      const { granted } = await Location.requestForegroundPermissionsAsync();
       if (!granted || !active) return;
 
       // 1. Posição em cache do sistema — retorna em milissegundos.
