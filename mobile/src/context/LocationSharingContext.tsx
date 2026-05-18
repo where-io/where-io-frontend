@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FriendLocation, LocationPayload } from '../models/FriendLocation';
 import { wsService } from '../service/WebSocketService';
-import { getAccessToken } from '../service/authTokenStore';
+import { getAccessToken, setOnTokenRefreshedCallback } from '../service/authTokenStore';
 import { useAuth } from './AuthContext';
 
 const TOGGLES_KEY = '@whereio/location_toggles';
@@ -51,7 +51,10 @@ export function LocationSharingProvider({ children }: { children: React.ReactNod
 
     setIsConnected(wsService.isConnected);
 
+    setOnTokenRefreshedCallback(() => wsService.reconnect());
+
     return () => {
+      setOnTokenRefreshedCallback(null);
       wsService.disconnect();
       setIsConnected(false);
     };
