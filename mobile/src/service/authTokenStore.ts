@@ -1,5 +1,6 @@
 let _accessToken: string | null = null;
 let _onExpired: (() => void) | null = null;
+let _onTokenRefreshed: (() => void) | null = null;
 
 export function getAccessToken(): string | null {
   return _accessToken;
@@ -15,4 +16,12 @@ export function setAccessToken(token: string | null): void {
 
 export function setOnExpiredCallback(cb: (() => void) | null): void {
   _onExpired = cb;
+}
+
+export function setOnTokenRefreshedCallback(cb: (() => void) | null): void {
+  _onTokenRefreshed = cb;
+}
+
+export function triggerTokenRefreshed(): void {
+  _onTokenRefreshed?.();
 }
