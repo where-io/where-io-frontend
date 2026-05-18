@@ -8,7 +8,12 @@ type TokenProvider = () => string | null;
 
 function isTokenExpired(token: string): boolean {
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    // JWT uses Base64url (- and _ instead of + and /), atob requires standard Base64
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    // Re-add stripped padding
+    const padded = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
+    const payload = JSON.parse(atob(padded));
     return Date.now() >= payload.exp * 1000;
   } catch {
     return true;
