@@ -1,6 +1,6 @@
 import { refreshTokensRequest } from './authService';
 import { getRefreshToken, saveRefreshToken, clearRefreshToken } from './authStorage';
-import { setAccessToken } from './authTokenStore';
+import { setAccessToken, triggerTokenRefreshed } from './authTokenStore';
 
 let _pending: Promise<boolean> | null = null;
 
@@ -18,6 +18,7 @@ async function _doRefresh(): Promise<boolean> {
   if (result.ok && result.data?.accessToken && result.data?.refreshToken) {
     setAccessToken(result.data.accessToken);
     await saveRefreshToken(result.data.refreshToken);
+    triggerTokenRefreshed();
     return true;
   }
 
