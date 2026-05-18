@@ -29,22 +29,26 @@ class WebSocketService {
       // Called before every connection attempt (including reconnects).
       // Refreshes an expired token silently before attempting the handshake.
       beforeConnect: async () => {
-        let token = getToken();
-        if (!token) {
-          this.client?.deactivate();
-          return;
-        }
-        if (isTokenExpired(token)) {
-          // notify=false: skip triggerTokenRefreshed to avoid circular reconnect call
-          const ok = await performTokenRefresh(false);
-          token = getToken();
-          if (!ok || !token) {
-            this.client?.deactivate();
+        try {
+          let token = getToken();
+          if (!token) {
+            this.client?.deactivate().catch(() => {});
             return;
           }
+          if (isTokenExpired(token)) {
+            // notify=false: skip triggerTokenRefreshed to avoid circular reconnect call
+            const ok = await performTokenRefresh(false);
+            token = getToken();
+            if (!ok || !token) {
+              this.client?.deactivate().catch(() => {});
+              return;
+            }
+          }
+          this.client!.brokerURL = `${WEBSOCKET_URL}?token=${encodeURIComponent(token)}`;
+          this.client!.connectHeaders = { token };
+        } catch (e) {
+          console.warn('[WS] beforeConnect error:', e);
         }
-        this.client!.brokerURL = `${WEBSOCKET_URL}?token=${encodeURIComponent(token)}`;
-        this.client!.connectHeaders = { token };
       },
 
       onConnect: () => {
@@ -75,7 +79,9 @@ class WebSocketService {
   reconnect(): void {
     const client = this.client;
     if (!client) return;
-    client.deactivate().then(() => client.activate());
+    client.deactivate()
+      .then(() => client.activate())
+      .catch((e) => console.warn('[WS] reconnect error:', e));
   }
 
   sendLocation(payload: LocationPayload): void {
