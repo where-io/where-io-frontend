@@ -53,6 +53,12 @@ class WebSocketService {
     this.client.activate();
   }
 
+  reconnect(): void {
+    const client = this.client;
+    if (!client) return;
+    client.deactivate().then(() => client.activate());
+  }
+
   sendLocation(payload: LocationPayload): void {
     if (!this.client?.connected) return;
     this.client.publish({
